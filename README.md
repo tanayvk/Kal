@@ -3,7 +3,9 @@ Kal is a open source, self-hosted, CLI based email newsletter app.
 
 ## Tasks
 
-- [ ] easier configuration
+- [x] confirmation email
+- [ ] unsubscribing
+- [ ] config command
 - [ ] templates
 - [ ] scheduling emails
 - [ ] sequences and automations
