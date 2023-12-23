@@ -5,7 +5,6 @@ export default {
   config(_input) {
     return {
       name: "emails",
-      region: "ap-south-1",
     };
   },
   stacks(app) {
