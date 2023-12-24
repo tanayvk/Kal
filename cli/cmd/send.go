@@ -165,7 +165,7 @@ func sendEmail(fileData string) tea.Cmd {
 
 func getSubscriberCount() int {
 	baseURL := viper.GetString("endpoint")
-	response, err := http.Get(baseURL + "/checkSend")
+	response, err := http.Get(baseURL + "/check_send")
 	if err != nil {
 		return 0
 	}

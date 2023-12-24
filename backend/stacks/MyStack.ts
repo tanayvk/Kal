@@ -32,10 +32,13 @@ export function Main({ stack }: StackContext) {
       },
     },
     routes: {
+      // public
       "POST /sub": "packages/functions/src/email.sub",
       "GET /confirm_sub": "packages/functions/src/email.confirmSub",
       "POST /unsub": "packages/functions/src/email.unsub",
-      "GET /checkSend": "packages/functions/src/email.checkSend",
+
+      // auth
+      "GET /check_send": "packages/functions/src/email.checkSend",
       "POST /send": "packages/functions/src/email.send",
     },
   });
