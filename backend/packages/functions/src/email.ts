@@ -1,14 +1,13 @@
-import fm from "front-matter";
-import * as marked from "marked";
 import { ApiHandler, useJsonBody } from "sst/node/api";
 
 import { EmailsService } from "@email-marketing/core/src/database";
 import {
   addSubscriber,
+  broadcast,
   confirmSubscriber,
+  getSubscriberCount,
   removeSubscriber,
 } from "@email-marketing/core/src/subscribers";
-import { sendEmail } from "@email-marketing/core/src/emails";
 
 export const sub = ApiHandler(async function (event) {
   // TODO: get the endpoint in a better way?
@@ -43,25 +42,11 @@ export async function confirmSub(event: any) {
 }
 
 export async function checkSend() {
-  const subs = await EmailsService.entities.Subscriber.scan
-    .where(({ confirmed }, { eq }) => `${eq(confirmed, true)}`)
-    .go();
   return {
-    count: subs.data.length,
+    count: await getSubscriberCount(),
   };
 }
 
 export const send = ApiHandler(async function (event) {
-  const content = fm(event.body);
-  const subs = await EmailsService.entities.Subscriber.scan
-    .where(({ confirmed }, { eq }) => `${eq(confirmed, true)}`)
-    .go();
-  // TODO: better settings for concurrency, email deliverability, and scheduling
-  for (const sub of subs.data) {
-    await sendEmail({
-      to: sub.email,
-      subject: (content.attributes as any).Subject,
-      html: marked.parse(content.body) as string,
-    });
-  }
+  await broadcast(event.body as string);
 });
