@@ -1,6 +1,5 @@
 import { ApiHandler, useJsonBody } from "sst/node/api";
 
-import { EmailsService } from "@email-marketing/core/src/database";
 import {
   addSubscriber,
   broadcast,
