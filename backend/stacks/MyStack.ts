@@ -35,7 +35,7 @@ export function Main({ stack }: StackContext) {
       // public
       "POST /sub": "packages/functions/src/email.sub",
       "GET /confirm_sub": "packages/functions/src/email.confirmSub",
-      "POST /unsub": "packages/functions/src/email.unsub",
+      "GET /unsub": "packages/functions/src/email.unsub",
 
       // auth
       "GET /check_send": "packages/functions/src/email.checkSend",
