@@ -41,6 +41,7 @@ export async function addSubscriber(
     subject: "Confirm your subscription to my newsletter!",
     html: marked.parse(md) as string,
   });
+  return sub;
 }
 
 export async function confirmSubscriber(id: string) {
@@ -52,27 +53,33 @@ export async function confirmSubscriber(id: string) {
 }
 
 export async function removeSubscriber(id: string) {
-  await EmailsService.entities.Subscriber.delete({ subscriberId: id }).go();
+  await EmailsService.entities.Subscriber.update({ subscriberId: id })
+    .set({ unsubscribed: true })
+    .go();
+}
+
+async function getSubscribers() {
+  const subs = await EmailsService.entities.Subscriber.scan
+    .where(({ confirmed }, { eq }) => `${eq(confirmed, true)}`)
+    .go({ pages: "all" });
+  return subs.data.filter((sub) => !sub.unsubscribed);
 }
 
 export async function getSubscriberCount(): Promise<number> {
-  const subs = await EmailsService.entities.Subscriber.scan
-    .where(({ confirmed }, { eq }) => `${eq(confirmed, true)}`)
-    .go();
-  return subs.data.length;
+  const subs = await getSubscribers();
+  return subs.length;
 }
 
-export async function broadcast(email: string) {
+export async function broadcast(email: string, endpoint: string) {
   // TODO: validation?
   const template = engine.parse(email);
-  const subs = await EmailsService.entities.Subscriber.scan
-    .where(({ confirmed }, { eq }) => `${eq(confirmed, true)}`)
-    .go();
-  for (const sub of subs.data) {
+  const subs = await getSubscribers();
+  for (const sub of subs) {
     // TODO: let's format the sub data in the template better
     const content = fm(
       await engine.render(template, {
         sub,
+        unsubscribe_link: `${endpoint}/unsub?id=${sub.subscriberId}`,
       }),
     );
     // TODO: better settings for concurrency, email deliverability, and scheduling

@@ -10,10 +10,17 @@ import {
 
 export const sub = ApiHandler(async function (event) {
   // TODO: get the endpoint in a better way?
-  const endpoint = event.headers.Host as string;
+  const endpoint = ("https://" + event.headers.host) as string;
   const body = useJsonBody();
   // TODO: add error handling
-  await addSubscriber(body.name, body.email, endpoint);
+  const sub = await addSubscriber(body.name, body.email, endpoint);
+  return {
+    statusCode: 200,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id: sub.data.subscriberId }),
+  };
 });
 
 export async function unsub(event: any) {
@@ -47,5 +54,7 @@ export async function checkSend() {
 }
 
 export const send = ApiHandler(async function (event) {
-  await broadcast(event.body as string);
+  // TODO: get the endpoint in a better way?
+  const endpoint = ("https://" + event.headers.host) as string;
+  await broadcast(event.body as string, endpoint);
 });

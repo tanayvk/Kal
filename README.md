@@ -70,8 +70,8 @@ To unsubscribe, `GET /unsub` with the `id` as a query parameter.
 ## Planned Features
 
 - [x] Confirmation email
+- [x] Unsubscribing
 - [ ] Authentication
-- [ ] Unsubscribing
 - [ ] Config command
 - [ ] Templates
 - [ ] Scheduling emails

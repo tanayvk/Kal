@@ -34,6 +34,10 @@ const Subscriber = new Entity({
       type: "boolean",
       default: false,
     },
+    unsubscribed: {
+      type: "boolean",
+      default: false,
+    },
   },
   indexes: {
     subscriber: {
