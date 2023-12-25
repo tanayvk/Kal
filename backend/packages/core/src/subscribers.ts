@@ -21,26 +21,36 @@ Or you can just paste this link in the browser:
 `;
 const confirmSubTemplate = engine.parse(confirmSubTemplateContent);
 
-export async function addSubscriber(
-  name: string,
-  email: string,
-  endpoint: string,
-) {
+type AddSubscriberInput = {
+  name: string;
+  email: string;
+  endpoint: string;
+  confirmed?: boolean;
+};
+export async function addSubscriber({
+  name,
+  email,
+  confirmed,
+  endpoint,
+}: AddSubscriberInput) {
   // TODO: basic validations to filter out nonsense emails
   const sub = await EmailsService.entities.Subscriber.create({
     email,
     name,
+    confirmed,
   }).go();
-  const confirm_link = `${endpoint}/confirm_sub?id=${sub.data.subscriberId}`;
-  const md = await engine.render(confirmSubTemplate, {
-    name,
-    confirm_link,
-  });
-  await sendEmail({
-    to: email,
-    subject: "Confirm your subscription to my newsletter!",
-    html: marked.parse(md) as string,
-  });
+  if (!confirmed) {
+    const confirm_link = `${endpoint}/confirm_sub?id=${sub.data.subscriberId}`;
+    const md = await engine.render(confirmSubTemplate, {
+      name,
+      confirm_link,
+    });
+    await sendEmail({
+      to: email,
+      subject: "Confirm your subscription to my newsletter!",
+      html: marked.parse(md) as string,
+    });
+  }
   return sub;
 }
 
@@ -75,7 +85,6 @@ export async function broadcast(email: string, endpoint: string) {
   const template = engine.parse(email);
   const subs = await getSubscribers();
   for (const sub of subs) {
-    // TODO: let's format the sub data in the template better
     const content = fm(
       await engine.render(template, {
         sub,

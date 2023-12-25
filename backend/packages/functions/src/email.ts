@@ -8,12 +8,16 @@ import {
   removeSubscriber,
 } from "@email-marketing/core/src/subscribers";
 
+// TODO: add validation and error handling
 export const sub = ApiHandler(async function (event) {
-  // TODO: get the endpoint in a better way?
   const endpoint = ("https://" + event.headers.host) as string;
   const body = useJsonBody();
-  // TODO: add error handling
-  const sub = await addSubscriber(body.name, body.email, endpoint);
+  const sub = await addSubscriber({
+    name: body.name,
+    email: body.email,
+    confirmed: !!body.confirmed,
+    endpoint,
+  });
   return {
     statusCode: 200,
     headers: {
@@ -54,7 +58,6 @@ export async function checkSend() {
 }
 
 export const send = ApiHandler(async function (event) {
-  // TODO: get the endpoint in a better way?
   const endpoint = ("https://" + event.headers.host) as string;
   await broadcast(event.body as string, endpoint);
 });
