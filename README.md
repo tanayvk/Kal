@@ -1,5 +1,7 @@
 # Kal
 
+![Kal CLI Demo Animation](./kal-demo.gif)
+
 Kal is a self-hosted, open-source, serverless CLI-based email newsletter app.
 
 Kal exposes a public REST API to manage subscribers, enabling you to set up custom frontends (e.g., subscribe forms) or other automation.
