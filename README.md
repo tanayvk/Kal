@@ -4,7 +4,7 @@ Kal is a self-hosted, open-source, serverless CLI-based email newsletter app.
 
 Kal exposes a public REST API to manage subscribers, enabling you to set up custom frontends (e.g., subscribe forms) or other automation.
 
-You can write and send emails using the CLI from any machine.
+You can write and send emails using the CLI from any machine (Windows / Linux / Mac OS).
 
 ## Quick Start
 
@@ -17,7 +17,7 @@ To begin using Kal, ensure you have the following:
 
 ### Step 1: Configure AWS CLI
 
-Follow the [official docs](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) to install the AWS CLI. After installation, run `aws configure` to set up your access key and region locally. It's recommended to use an IAM user's access key (with sufficient access) rather than the root account.
+Follow [the official docs](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) to install the AWS CLI. After installation, run `aws configure` to set up your access key and region locally. It's recommended to use an IAM user's access key (with sufficient access) rather than the root account.
 
 For more information on access keys and how to generate them, consult the [AWS docs](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html).
 
@@ -67,7 +67,7 @@ Example:
 
 To unsubscribe, `GET /unsub` with the `id` as a query parameter.
 
-## Planned Features
+## Tasks and planned features
 
 - [x] Confirmation email
 - [x] Unsubscribing
@@ -87,5 +87,4 @@ To unsubscribe, `GET /unsub` with the `id` as a query parameter.
 ## FAQs
 
 ### Why do you call it Kal?
-It's named after Kaladin from the Stormlight Archive, one of my favorite fictional characters of all time. I think it goes well as a name for a simple CLI.
-
+It's named after Kaladin from [the Stormlight Archive](https://www.goodreads.com/series/49075-the-stormlight-archive), who is one of my favorite fictional characters of all time. I think it goes well as a name for a CLI too.
