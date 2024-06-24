@@ -13,25 +13,29 @@ You can write and send emails using the CLI from any machine (Windows / Linux / 
 To begin using Kal, ensure you have the following:
 
 - AWS account (free-tier works just fine)
-- SMTP server (Outlook or Gmail can be used initially)
+- an SMTP server
 - NodeJS (preferably the latest LTS, currently 20.10.0)
 - Go (for compiling the CLI, prebuilt binary releases are not available yet)
 
-### Step 1: Configure AWS CLI
+### Step 1: Configuring AWS CLI
 
 Follow [the official docs](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) to install the AWS CLI. After installation, run `aws configure` to set up your access key and region locally. It's recommended to use an IAM user's access key (with sufficient access) rather than the root account.
 
 For more information on access keys and how to generate them, consult the [AWS docs](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html).
 
-### Step 2: Deploy the Backend
+### Step 2: Deploying the Backend
 
 Clone this repository, switch to the `backend` folder, and install dependencies by running `npm i`.
 
-We use [SST](https://sst.dev) to deploy the Serverless backend on AWS. To deploy, run: `npx sst deploy --region us-west-1 --stage test`. You can use any `AWS_REGION` and stage name. You can also deploy multiple instances of Kal on different stages using different names.
+We use [SST Ion](https://ion.sst.dev) to deploy the Serverless backend on AWS.
+To deploy, run: `AWS_REGION=us-west-2 sst deploy --stage=prod`.
+You can use any `AWS_REGION` and stage name.
+You can also deploy multiple instances of Kal using different stage names or regions.
 
-SST will deploy a CloudFormation stack to create and manage all necessary resources. To update, pull the latest code, and run the same `npx sst deploy` command again.
+SST Ion will [Pulumi](https://www.pulumi.com/) to create and manage all the necessary resources.
+To perform updates, pull the latest code, and run the same deploy command again.
 
-### Step 3: Install Kal CLI
+### Step 3: Installing Kal CLI
 
 The Kal CLI can be installed on any machine, not necessarily the same machine where you deployed the backend.
 
@@ -80,13 +84,23 @@ To unsubscribe, `GET /unsub` with the `id` as a query parameter.
 - [ ] Filters while sending
 - [ ] Support for multiple lists
 - [ ] Support for multiple users
+- [ ] Managing users and lists using CLI
 - [ ] Email deliverability
 - [ ] Support for multiple SMTP servers
-- [ ] Sequences and automations
-- [ ] Tracking: open rates and link clicks
+- [ ] Sequences
+- [ ] Custom automations
+- [ ] Tracking and analytics
+    - [ ] Open rates, link clicks
 - [ ] Styling
+- [ ] Landing page
+- [ ] Paid subscriptions
+- [ ] Bulk subscriber import
+- [ ] Referrals
+- [ ] Webhooks
+- [ ] Move out of Secrets Manager
 
 ## FAQs
 
 ### Why do you call it Kal?
+
 It's named after Kaladin from [the Stormlight Archive](https://www.goodreads.com/series/49075-the-stormlight-archive), who is one of my favorite fictional characters of all time. I think it goes well as a name for a CLI too.
