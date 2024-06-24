@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { v4 as uuid_v4 } from "uuid";
 import { Entity, Service } from "electrodb";
-import { Table } from "sst/node/table";
+import { Resource } from "sst";
 
 const dynamodb = new DynamoDBClient();
 
@@ -55,5 +55,5 @@ const Subscriber = new Entity({
 
 export const EmailsService = new Service(
   { Subscriber },
-  { client: dynamodb, table: (Table as any).emails.tableName },
+  { client: dynamodb, table: Resource.Main.name },
 );

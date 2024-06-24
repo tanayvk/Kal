@@ -1,4 +1,6 @@
-import { ApiHandler, useJsonBody } from "sst/node/api";
+import fm from "front-matter";
+
+const ApiHandler = (x: any) => x;
 
 import {
   addSubscriber,
@@ -11,7 +13,7 @@ import {
 // TODO: add validation and error handling
 export const sub = ApiHandler(async function (event) {
   const endpoint = ("https://" + event.headers.host) as string;
-  const body = useJsonBody();
+  const body = JSON.parse(event.body);
   const sub = await addSubscriber({
     name: body.name,
     email: body.email,

@@ -142,6 +142,9 @@ type emailSentMsg struct{}
 func validateEmail(filePath string) tea.Cmd {
 	return func() tea.Msg {
 		// TODO: don't convert anything, just validate the markdown
+		// check if file exists
+		// also support for various ways to point to the file
+		// with extension, without extension
 		data, _ := readFileToString(fmt.Sprintf("emails/%s.md", filePath))
 		return emailValidatedMsg{
 			fileData: data,
