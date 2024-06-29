@@ -21,8 +21,8 @@
     "packages/*"
   ],
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.606.0",
     "front-matter": "^4.0.2",
-    "marked": "^11.1.0",
-    "sst": "^3.0.33"
+    "marked": "^11.1.0"
   }
 }

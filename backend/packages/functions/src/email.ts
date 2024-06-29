@@ -1,7 +1,5 @@
 import fm from "front-matter";
 
-const ApiHandler = (x: any) => x;
-
 import {
   addSubscriber,
   broadcast,
@@ -11,14 +9,12 @@ import {
 } from "@email-marketing/core/src/subscribers";
 
 // TODO: add validation and error handling
-export const sub = ApiHandler(async function (event) {
-  const endpoint = ("https://" + event.headers.host) as string;
+export const sub = async function (event: any) {
   const body = JSON.parse(event.body);
   const sub = await addSubscriber({
     name: body.name,
     email: body.email,
     confirmed: !!body.confirmed,
-    endpoint,
   });
   return {
     statusCode: 200,
@@ -27,7 +23,7 @@ export const sub = ApiHandler(async function (event) {
     },
     body: JSON.stringify({ id: sub.data.subscriberId }),
   };
-});
+};
 
 export async function unsub(event: any) {
   const { id } = event.queryStringParameters;
@@ -53,13 +49,10 @@ export async function confirmSub(event: any) {
   };
 }
 
-export async function checkSend() {
-  return {
-    count: await getSubscriberCount(),
-  };
+export async function checkSend(event: any) {
+  return await broadcast(event.body as string, true);
 }
 
-export const send = ApiHandler(async function (event) {
-  const endpoint = ("https://" + event.headers.host) as string;
-  await broadcast(event.body as string, endpoint);
-});
+export const send = async function (event: any) {
+  return await broadcast(event.body as string, false);
+};

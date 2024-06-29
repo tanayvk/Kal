@@ -73,10 +73,12 @@ Example:
 
 To unsubscribe, `GET /unsub` with the `id` as a query parameter.
 
+### How it works
+
+**TODO**
+
 ## Tasks and planned features
 
-- [x] Confirmation email
-- [x] Unsubscribing
 - [ ] Authentication
 - [ ] Config command
 - [ ] Templates
@@ -98,6 +100,10 @@ To unsubscribe, `GET /unsub` with the `id` as a query parameter.
 - [ ] Referrals
 - [ ] Webhooks
 - [ ] Move out of Secrets Manager
+- [ ] Images and attachments with S3
+- [ ] Pending emails, undo send, sent logs
+- [x] Confirmation email
+- [x] Unsubscribing
 
 ## FAQs
 

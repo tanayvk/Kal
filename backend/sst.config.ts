@@ -42,23 +42,52 @@ export default $config({
             maxAge: 0,
           },
         },
-        route: {
-          handler: {
-            link: [emailsTable],
-            permissions: [
-              {
-                actions: ["secretsmanager:*"],
-                resources: ["*"],
-              },
-            ],
-          },
-        },
       },
     });
-    api.route("POST /sub", "packages/functions/src/email.sub");
-    api.route("GET /confirm_sub", "packages/functions/src/email.confirmSub");
-    api.route("POST /unsub", "packages/functions/src/email.unsub");
-    api.route("GET /check_send", "packages/functions/src/email.checkSend");
-    api.route("POST /send", "packages/functions/src/email.send");
+    const topic = new sst.aws.SnsTopic("SendEmailTopic");
+    topic.subscribe({
+      handler: "packages/core/src/emails.sender",
+      link: [api, emailsTable],
+      permissions: [
+        {
+          actions: ["secretsmanager:*"],
+          resources: ["*"],
+        },
+      ],
+    });
+    api.route("POST /sub", {
+      handler: "packages/functions/src/email.sub",
+      link: [api, emailsTable],
+    });
+    api.route("GET /confirm_sub", {
+      handler: "packages/functions/src/email.confirmSub",
+      link: [api, emailsTable],
+    });
+    api.route("POST /unsub", {
+      handler: "packages/functions/src/email.unsub",
+      link: [api, emailsTable],
+    });
+    api.route("POST /check_send", {
+      handler: "packages/functions/src/email.checkSend",
+      link: [api, emailsTable],
+    });
+    api.route("POST /send", {
+      handler: "packages/functions/src/email.send",
+      link: [api, topic, emailsTable],
+    });
+
+    new sst.aws.Cron("Sender", {
+      job: {
+        handler: "packages/core/src/emails.sender",
+        link: [api, emailsTable],
+        permissions: [
+          {
+            actions: ["secretsmanager:*"],
+            resources: ["*"],
+          },
+        ],
+      },
+      schedule: "cron(*/30 10 * * ? *)",
+    });
   },
 });

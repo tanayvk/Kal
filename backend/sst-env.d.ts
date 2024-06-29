@@ -11,6 +11,10 @@ declare module "sst" {
       name: string
       type: "sst.aws.Dynamo"
     }
+    SendEmailTopic: {
+      arn: string
+      type: "sst.aws.SnsTopic"
+    }
   }
 }
 export {}

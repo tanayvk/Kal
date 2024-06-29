@@ -1,11 +1,20 @@
 import { marked } from "marked";
 import { Liquid } from "liquidjs";
-import fm from "front-matter";
 
-import { EmailsService } from "./database";
+import {
+  EmailResponse as CreateEmailResponse,
+  EmailsService,
+} from "./database";
 import { sendEmail } from "./emails";
+import { Resource } from "sst";
+import { getSubscribers } from "./utils";
+import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
+import { compileExpression } from "filtrex";
+import { getFilter } from "./filter";
 
 const engine = new Liquid();
+
+const snsClient = new SNSClient();
 
 const confirmSubTemplateContent = `
 Hey {{name}},
@@ -24,14 +33,12 @@ const confirmSubTemplate = engine.parse(confirmSubTemplateContent);
 type AddSubscriberInput = {
   name: string;
   email: string;
-  endpoint: string;
   confirmed?: boolean;
 };
 export async function addSubscriber({
   name,
   email,
   confirmed,
-  endpoint,
 }: AddSubscriberInput) {
   // TODO: basic validations to filter out nonsense emails
   const sub = await EmailsService.entities.Subscriber.create({
@@ -40,7 +47,7 @@ export async function addSubscriber({
     confirmed,
   }).go();
   if (!confirmed) {
-    const confirm_link = `${endpoint}/confirm_sub?id=${sub.data.subscriberId}`;
+    const confirm_link = `${Resource.Api.url}/confirm_sub?id=${sub.data.subscriberId}`;
     const md = await engine.render(confirmSubTemplate, {
       name,
       confirm_link,
@@ -68,34 +75,51 @@ export async function removeSubscriber(id: string) {
     .go();
 }
 
-async function getSubscribers() {
-  const subs = await EmailsService.entities.Subscriber.scan
-    .where(({ confirmed }, { eq }) => `${eq(confirmed, true)}`)
-    .go({ pages: "all" });
-  return subs.data.filter((sub) => !sub.unsubscribed);
-}
-
-export async function getSubscriberCount(): Promise<number> {
+export async function broadcast(email: string, dry: boolean) {
+  // TODO: validation and errors?
+  const emailObj = JSON.parse(email);
+  const time = new Date(emailObj.time).getTime() || 0;
+  let filter;
+  try {
+    filter = getFilter(emailObj.filter);
+  } catch (err) {
+    console.log("invalid filter", err);
+    return {
+      error: "Invalid filter.",
+    };
+  }
+  // rename to send email
+  const createEvent = EmailsService.entities.Event.create({
+    payload: emailObj,
+    time,
+  });
+  let event: CreateEmailResponse | null = null;
+  if (!dry) {
+    event = await createEvent.go();
+  }
   const subs = await getSubscribers();
-  return subs.length;
-}
-
-export async function broadcast(email: string, endpoint: string) {
-  // TODO: validation?
-  const template = engine.parse(email);
-  const subs = await getSubscribers();
+  const createEmails = [];
   for (const sub of subs) {
-    const content = fm(
-      await engine.render(template, {
-        sub,
-        unsubscribe_link: `${endpoint}/unsub?id=${sub.subscriberId}`,
+    if (!filter({ name: sub.name, sub })) continue;
+    createEmails.push(
+      EmailsService.entities.Email.create({
+        to: sub.email,
+        subscriberId: sub.subscriberId,
+        eventId: event ? event.data.eventId : "dryRun",
+        time,
       }),
     );
-    // TODO: better settings for concurrency, email deliverability, and scheduling
-    await sendEmail({
-      to: sub.email,
-      subject: (content.attributes as any).Subject,
-      html: marked.parse(content.body) as string,
-    });
   }
+  if (!dry) {
+    await Promise.all(createEmails.map((email) => email.go()));
+    await snsClient.send(
+      new PublishCommand({
+        TopicArn: Resource.SendEmailTopic.arn,
+        Message: new Date().toString(),
+      }),
+    );
+  }
+  return {
+    count: createEmails.length,
+  };
 }
