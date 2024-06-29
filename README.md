@@ -82,8 +82,6 @@ To unsubscribe, `GET /unsub` with the `id` as a query parameter.
 - [ ] Authentication
 - [ ] Config command
 - [ ] Templates
-- [ ] Scheduling emails
-- [ ] Filters while sending
 - [ ] Support for multiple lists
 - [ ] Support for multiple users
 - [ ] Managing users and lists using CLI
@@ -104,6 +102,8 @@ To unsubscribe, `GET /unsub` with the `id` as a query parameter.
 - [ ] Pending emails, undo send, sent logs
 - [x] Confirmation email
 - [x] Unsubscribing
+- [x] Scheduling emails
+- [x] Filters while sending
 
 ## FAQs
 
