@@ -100,7 +100,8 @@ export async function broadcast(email: string, dry: boolean) {
   const subs = await getSubscribers();
   const createEmails = [];
   for (const sub of subs) {
-    if (!filter({ name: sub.name, sub })) continue;
+    const subFilter = filter({ name: sub.name, sub });
+    if (!subFilter) continue;
     createEmails.push(
       EmailsService.entities.Email.create({
         to: sub.email,

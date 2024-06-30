@@ -4,7 +4,7 @@ import {
 } from "filtrex";
 
 export function getFilter(exp: string) {
-  return compileExpression(exp || "true", {
+  return compileExpression(exp || "1", {
     customProp: useDotAccessOperatorAndOptionalChaining,
     extraFunctions: {
       strlen(s: string) {

@@ -231,7 +231,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.status = PROMPT
 		m.count = msg.count
 		return m, utils.Prompt("37", "16", "prompt",
-			fmt.Sprintf("Do you want the send the email to %d subscribers?", m.count))
+			fmt.Sprintf("Do you want to send the email to %d subscribers?", m.count))
 	case emailSentMsg:
 		m.status = DONE
 		return m, tea.Quit
