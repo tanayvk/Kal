@@ -4,9 +4,8 @@ import {
   addSubscriber,
   broadcast,
   confirmSubscriber,
-  getSubscriberCount,
   removeSubscriber,
-} from "@email-marketing/core/src/subscribers";
+} from "../core/subscribers";
 
 // TODO: add validation and error handling
 export const sub = async function (event: any) {

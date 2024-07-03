@@ -1,28 +1,31 @@
 {
-  "name": "email-marketing",
+  "name": "kal",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "scripts": {
-    "dev": "sst dev",
-    "build": "sst build",
-    "deploy": "sst deploy",
-    "remove": "sst remove",
-    "console": "sst console",
-    "typecheck": "tsc --noEmit"
+    "test": "sst bind vitest",
+    "typecheck": "tsc -noEmit"
   },
   "devDependencies": {
-    "@tsconfig/node18": "^18.2.2",
-    "aws-cdk-lib": "2.110.1",
-    "constructs": "10.3.0",
-    "typescript": "^5.3.2"
+    "@types/node": "^20.10.0",
+    "@types/nodemailer": "^6.4.14",
+    "@types/uuid": "^9.0.7",
+    "vitest": "^0.34.6"
   },
-  "workspaces": [
-    "packages/*"
-  ],
   "dependencies": {
-    "@aws-sdk/client-sns": "^3.606.0",
+    "@aws-sdk/client-dynamodb": "3.473.0",
+    "@aws-sdk/client-secrets-manager": "^3.474.0",
+    "@aws-sdk/client-sns": "^3.609.0",
+    "@aws-sdk/lib-dynamodb": "3.473.0",
+    "@supercharge/promise-pool": "^3.2.0",
+    "electrodb": "2.12.1",
+    "filtrex": "^3.0.0",
     "front-matter": "^4.0.2",
-    "marked": "^11.1.0"
+    "liquidjs": "^10.9.4",
+    "marked": "^13.0.1",
+    "nodemailer": "^6.9.7",
+    "sst": "^3.0.37",
+    "uuid": "^10.0.0",
+    "zod": "^3.22.4"
   }
 }

@@ -1,7 +1,7 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
 export default $config({
-  app(input) {
+  app(_input) {
     return {
       name: "Emails",
       home: "aws",
@@ -46,7 +46,7 @@ export default $config({
     });
     const topic = new sst.aws.SnsTopic("SendEmailTopic");
     topic.subscribe({
-      handler: "packages/core/src/emails.sender",
+      handler: "app/core/emails.sender",
       link: [api, emailsTable],
       permissions: [
         {
@@ -55,30 +55,38 @@ export default $config({
         },
       ],
     });
+
+    // public
     api.route("POST /sub", {
-      handler: "packages/functions/src/email.sub",
+      handler: "app/src/email.sub",
       link: [api, emailsTable],
     });
     api.route("GET /confirm_sub", {
-      handler: "packages/functions/src/email.confirmSub",
+      handler: "app/src/email.confirmSub",
       link: [api, emailsTable],
     });
     api.route("POST /unsub", {
-      handler: "packages/functions/src/email.unsub",
+      handler: "app/src/email.unsub",
       link: [api, emailsTable],
     });
+
+    // sender auth
     api.route("POST /check_send", {
-      handler: "packages/functions/src/email.checkSend",
+      handler: "app/src/email.checkSend",
       link: [api, emailsTable],
     });
     api.route("POST /send", {
-      handler: "packages/functions/src/email.send",
+      handler: "app/src/email.send",
+      link: [api, topic, emailsTable],
+    });
+    api.route("POST /sender_config", {
+      handler: "app/src/email.send",
       link: [api, topic, emailsTable],
     });
 
     new sst.aws.Cron("Sender", {
       job: {
-        handler: "packages/core/src/emails.sender",
+        handler: "app/src/emails.sender",
         link: [api, emailsTable],
         permissions: [
           {

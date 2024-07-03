@@ -1,15 +1,14 @@
 import { marked } from "marked";
 import { Liquid } from "liquidjs";
+import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
+import { Resource } from "sst";
 
 import {
   EmailResponse as CreateEmailResponse,
   EmailsService,
 } from "./database";
 import { sendEmail } from "./emails";
-import { Resource } from "sst";
 import { getSubscribers } from "./utils";
-import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
-import { compileExpression } from "filtrex";
 import { getFilter } from "./filter";
 
 const engine = new Liquid();

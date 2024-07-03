@@ -2,11 +2,12 @@ import * as nodemailer from "nodemailer";
 import fm from "front-matter";
 import { Liquid } from "liquidjs";
 import { marked } from "marked";
+import { Resource } from "sst";
+import { PromisePool } from "@supercharge/promise-pool";
 
 import { getSMTPCredentials } from "./secrets";
-import { EmailsService } from "./database";
+import { EmailEntity, EmailsService } from "./database";
 import { getSubscribers } from "./utils";
-import { Resource } from "sst";
 
 const engine = new Liquid();
 
@@ -36,6 +37,7 @@ export async function sendEmail(email: Email) {
 // run this as a cron job + when sending a email right away
 // TODO: try switching to using Event Scheduler for scheduling emails
 // for Scheduler, we can just schedule this function
+// TODO: email deliverability, concurrency
 export async function sender() {
   const buffer = 2 * 60 * 1000; // 2 minutes
   const emails = await EmailsService.entities.Email.query
@@ -62,37 +64,44 @@ export async function sender() {
   const subsById: Record<string, any> = {};
   subs.forEach((sub) => (subsById[sub.subscriberId] = sub));
 
-  await Promise.all(
-    emails.data.map(async (email) => {
-      try {
-        const event = eventsById[email.eventId];
-        const sub = subsById[email.subscriberId];
-        const content = fm(
-          await engine.render(event.template, {
-            sub,
-            unsubscribe_link: `${Resource.Api.url}/unsub?id=${sub.subscriberId}`,
-          }),
-        );
-        // TODO: better settings for concurrency, email deliverability, and scheduling
-        await sendEmail({
-          to: sub.email,
-          subject: (content.attributes as any).Subject,
-          html: marked.parse(content.body) as string,
-        });
-        await EmailsService.entities.Email.update({ emailId: email.emailId })
-          .set({ status: "sent" })
-          .go();
-      } catch (err) {
-        console.log("err sending", email.emailId, err);
-        await EmailsService.entities.Email.update({ emailId: email.emailId })
-          .add({ retries: 1 })
-          .go();
-      }
-    }),
-  );
-}
+  await PromisePool.withConcurrency(1) // TODO: set concurrency from config
+    .for(emails.data)
+    .process(handleEmail);
 
-// const template = engine.parse(email);
-// const subs = await getSubscribers();
-// for (const sub of subs) {
-// }
+  async function handleEmail(email: EmailEntity) {
+    try {
+      try {
+        await EmailsService.entities.Email.update({ emailId: email.emailId })
+          .set({ status: "sending" })
+          .where(({ status }, { eq }) => eq(status, "pending"))
+          .go();
+      } catch {
+        // email got picked up other sender, skip
+        console.log("skipping email", email.emailId);
+        return;
+      }
+      const event = eventsById[email.eventId];
+      const sub = subsById[email.subscriberId];
+      const content = fm(
+        await engine.render(event.template, {
+          sub,
+          unsubscribe_link: `${Resource.Api.url}/unsub?id=${sub.subscriberId}`,
+        }),
+      );
+      await sendEmail({
+        to: sub.email,
+        subject: (content.attributes as any).Subject,
+        html: marked.parse(content.body) as string,
+      });
+      await EmailsService.entities.Email.update({ emailId: email.emailId })
+        .set({ status: "sent" })
+        .go();
+    } catch (err) {
+      console.log("err sending", email.emailId, err);
+      await EmailsService.entities.Email.update({ emailId: email.emailId })
+        .add({ retries: 1 })
+        .set({ status: (email.retries || 0) > 3 ? "failed" : "pending" })
+        .go();
+    }
+  }
+}

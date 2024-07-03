@@ -1,10 +1,10 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { v4 as uuid_v4 } from "uuid";
 import { Entity, Service } from "electrodb";
-import { CreateEntityResponse } from "electrodb/index";
+import { EntityItem, CreateEntityResponse } from "electrodb/index";
 import { Resource } from "sst";
 
-const dynamodb = new DynamoDBClient();
+const client = new DynamoDBClient();
 
 const Subscriber = new Entity({
   model: {
@@ -93,7 +93,7 @@ const Email = new Entity({
       default: 0, // send right away
     },
     status: {
-      type: ["pending", "sent", "failed"],
+      type: ["pending", "sending", "sent", "failed"],
       default: "pending",
     },
     retries: {
@@ -171,7 +171,9 @@ const Event = new Entity({
 
 export const EmailsService = new Service(
   { Subscriber, Email, Event },
-  { client: dynamodb, table: Resource.Main.name },
+  { client, table: Resource.Main.name },
 );
 
 export type EmailResponse = CreateEntityResponse<typeof Email>;
+
+export type EmailEntity = EntityItem<typeof Email>;
