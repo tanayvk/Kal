@@ -5,11 +5,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/spf13/cobra"
 )
 
 type editorFinishedMsg struct{ err error }
@@ -29,7 +30,7 @@ func openEditor(filePath string) {
 }
 
 var newFileContent = `---
-Subject: subject goes here
+Subject: Subject goes here
 ---
 
 A fresh *new* markdown email.
@@ -40,15 +41,25 @@ var newCmd = &cobra.Command{
 	Short: "Create a new email to send.",
 	Long:  `TODO: write longer description of new command.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			fmt.Println("Error: Please provide a valid path.")
-			return
+		path := args[0]
+
+		template := ""
+		if len(args) == 2 {
+			template = args[1]
 		}
 
-		path := args[0]
+		content := newFileContent
+		if template != "" {
+			input, err := os.ReadFile(template)
+			if err != nil {
+				fmt.Println("Error reading template file:", err)
+				return
+			}
+			content = string(input)
+		}
+
 		filePath := filepath.Join("emails", path+".md")
 
-		// Check if the "emails" folder exists, create it if not
 		if _, err := os.Stat("emails"); os.IsNotExist(err) {
 			err := os.Mkdir("emails", os.ModePerm)
 			if err != nil {
@@ -57,13 +68,11 @@ var newCmd = &cobra.Command{
 			}
 		}
 
-		// Check if the file already exists
 		if _, err := os.Stat(filePath); !os.IsNotExist(err) {
 			fmt.Println("Error: File already exists at", filePath)
 			return
 		}
 
-		// Create the file
 		file, err := os.Create(filePath)
 		if err != nil {
 			fmt.Println("Error creating file:", err)
@@ -71,8 +80,7 @@ var newCmd = &cobra.Command{
 		}
 		defer file.Close()
 
-		// Write to the file
-		_, err = file.WriteString(newFileContent)
+		_, err = file.WriteString(content)
 		if err != nil {
 			fmt.Println("Error writing to file:", err)
 			return
@@ -81,9 +89,10 @@ var newCmd = &cobra.Command{
 		openEditor(filePath)
 		fmt.Printf("Email created at '%s'\n", filePath)
 	},
-	Args: cobra.ExactArgs(1),
+	Args: cobra.RangeArgs(1, 2),
 }
 
+// TODO: use bubbletea
 func init() {
 	rootCmd.AddCommand(newCmd)
 }
