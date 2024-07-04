@@ -8,6 +8,7 @@ export default $config({
     };
   },
   async run() {
+    const jwtSecret = new sst.Secret("JwtSecret", "random-jwt");
     const emailsTable = new sst.aws.Dynamo("Main", {
       fields: {
         pk: "string",
@@ -57,6 +58,10 @@ export default $config({
     });
 
     // public
+    api.route("GET /status", {
+      handler: "app/src/email.getStatus",
+      link: [api, emailsTable],
+    });
     api.route("POST /sub", {
       handler: "app/src/email.sub",
       link: [api, emailsTable],
@@ -71,17 +76,21 @@ export default $config({
     });
 
     // sender auth
+    api.route("GET /sender", {
+      handler: "app/src/email.getSender",
+      link: [api, emailsTable, jwtSecret],
+    });
     api.route("POST /check_send", {
       handler: "app/src/email.checkSend",
-      link: [api, emailsTable],
+      link: [api, emailsTable, jwtSecret],
     });
     api.route("POST /send", {
       handler: "app/src/email.send",
-      link: [api, topic, emailsTable],
+      link: [api, topic, emailsTable, jwtSecret],
     });
     api.route("POST /sender_config", {
-      handler: "app/src/email.send",
-      link: [api, topic, emailsTable],
+      handler: "app/src/email.senderConfig",
+      link: [api, topic, emailsTable, jwtSecret],
     });
 
     new sst.aws.Cron("Sender", {

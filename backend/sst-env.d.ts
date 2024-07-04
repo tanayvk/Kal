@@ -7,6 +7,10 @@ declare module "sst" {
       type: "sst.aws.ApiGatewayV2"
       url: string
     }
+    JwtSecret: {
+      type: "sst.sst.Secret"
+      value: string
+    }
     Main: {
       name: string
       type: "sst.aws.Dynamo"

@@ -10,6 +10,9 @@
     "@types/node": "^20.10.0",
     "@types/nodemailer": "^6.4.14",
     "@types/uuid": "^9.0.7",
+    "eslint": "9.x",
+    "globals": "^15.8.0",
+    "typescript-eslint": "^7.15.0",
     "vitest": "^0.34.6"
   },
   "dependencies": {
@@ -21,6 +24,7 @@
     "electrodb": "2.12.1",
     "filtrex": "^3.0.0",
     "front-matter": "^4.0.2",
+    "jsonwebtoken": "^9.0.2",
     "liquidjs": "^10.9.4",
     "marked": "^13.0.1",
     "nodemailer": "^6.9.7",

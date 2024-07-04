@@ -66,9 +66,9 @@ const Email = new Entity({
       default: () => uuid_v4(),
       required: true,
     },
-    from: {
+    senderId: {
       type: "string",
-      required: false,
+      required: true,
     },
     to: {
       type: "string",
@@ -138,9 +138,9 @@ const Event = new Entity({
       default: () => uuid_v4(),
       required: true,
     },
-    from: {
+    senderId: {
       type: "string",
-      required: false,
+      required: true,
     },
     payload: {
       type: "any",
@@ -150,6 +150,7 @@ const Event = new Entity({
       type: "number",
       default: new Date().getTime(),
       readOnly: true,
+      required: true,
     },
     time: {
       type: "number",
@@ -169,11 +170,50 @@ const Event = new Entity({
   },
 });
 
+const Sender = new Entity({
+  model: {
+    entity: "sender",
+    version: "1",
+    service: "emails",
+  },
+  attributes: {
+    senderId: {
+      type: "string",
+      default: () => uuid_v4(),
+      required: true,
+    },
+    creds: {
+      type: "any",
+      required: true,
+    },
+    createdAt: {
+      type: "number",
+      default: new Date().getTime(),
+      readOnly: true,
+      required: true,
+    },
+  },
+  indexes: {
+    event: {
+      pk: {
+        field: "pk",
+        composite: ["senderId"],
+      },
+      sk: {
+        field: "sk",
+        composite: [],
+      },
+    },
+  },
+});
+
 export const EmailsService = new Service(
-  { Subscriber, Email, Event },
+  { Subscriber, Email, Event, Sender },
   { client, table: Resource.Main.name },
 );
 
 export type EmailResponse = CreateEntityResponse<typeof Email>;
 
 export type EmailEntity = EntityItem<typeof Email>;
+
+export type SenderItem = EntityItem<typeof Sender>;

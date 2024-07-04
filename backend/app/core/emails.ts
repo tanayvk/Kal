@@ -5,17 +5,23 @@ import { marked } from "marked";
 import { Resource } from "sst";
 import { PromisePool } from "@supercharge/promise-pool";
 
-import { getSMTPCredentials } from "./secrets";
-import { EmailEntity, EmailsService } from "./database";
+import { EmailEntity, EmailsService, SenderItem } from "./database";
 import { getSubscribers } from "./utils";
 
 const engine = new Liquid();
 
-let transporter: any;
-async function getTransporter() {
-  if (transporter) return transporter;
-  transporter = nodemailer.createTransport(await getSMTPCredentials());
-  return transporter;
+let transporters: Record<string, any> = {};
+async function getTransporter(sender: SenderItem) {
+  if (transporters[sender.senderId]) return transporters[sender.senderId];
+  return (transporters[sender.senderId] = nodemailer.createTransport({
+    host: sender.creds.host,
+    port: sender.creds.port,
+    secure: !!sender.creds.secure,
+    auth: {
+      user: sender.creds.user,
+      pass: sender.creds.pass,
+    },
+  }));
 }
 
 type Email = {
@@ -23,11 +29,10 @@ type Email = {
   subject: string;
   html: string;
 };
-export async function sendEmail(email: Email) {
-  const creds = await getSMTPCredentials();
-  const transporter = await getTransporter();
+export async function sendEmail(email: Email, sender: SenderItem) {
+  const transporter = await getTransporter(sender);
   return await transporter.sendMail({
-    from: creds.from,
+    from: `"${sender.creds.name}" <${sender.creds.email}>`,
     to: email.to,
     subject: email.subject,
     html: email.html,
@@ -60,6 +65,19 @@ export async function sender() {
     event.template = engine.parse(event?.payload.fileData);
   });
 
+  const sendersById: Record<string, any> = {};
+  const senderIds = new Set(emails.data.map((email) => email.senderId));
+  const senders = await Promise.all(
+    [...senderIds].map((senderId) =>
+      EmailsService.entities.Sender.get({ senderId })
+        .go()
+        .then(({ data }) => data),
+    ),
+  );
+  senders.filter(Boolean).forEach((sender: any) => {
+    sendersById[sender?.senderId as string] = sender;
+  });
+
   const subs = await getSubscribers();
   const subsById: Record<string, any> = {};
   subs.forEach((sub) => (subsById[sub.subscriberId] = sub));
@@ -80,6 +98,7 @@ export async function sender() {
         console.log("skipping email", email.emailId);
         return;
       }
+      const sender = sendersById[email.senderId];
       const event = eventsById[email.eventId];
       const sub = subsById[email.subscriberId];
       const content = fm(
@@ -88,18 +107,21 @@ export async function sender() {
           unsubscribe_link: `${Resource.Api.url}/unsub?id=${sub.subscriberId}`,
         }),
       );
-      await sendEmail({
-        to: sub.email,
-        subject: (content.attributes as any).Subject,
-        html: marked.parse(content.body) as string,
-      });
+      await sendEmail(
+        {
+          to: sub.email,
+          subject: (content.attributes as any).Subject,
+          html: marked.parse(content.body) as string,
+        },
+        sender,
+      );
       await EmailsService.entities.Email.update({ emailId: email.emailId })
         .set({ status: "sent" })
         .go();
     } catch (err) {
       console.log("err sending", email.emailId, err);
       await EmailsService.entities.Email.update({ emailId: email.emailId })
-        .add({ retries: 1 })
+        .add({ retries: 1 }) // TODO: wtf is this TS error
         .set({ status: (email.retries || 0) > 3 ? "failed" : "pending" })
         .go();
     }

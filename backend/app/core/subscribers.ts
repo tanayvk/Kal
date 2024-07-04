@@ -6,6 +6,7 @@ import { Resource } from "sst";
 import {
   EmailResponse as CreateEmailResponse,
   EmailsService,
+  SenderItem,
 } from "./database";
 import { sendEmail } from "./emails";
 import { getSubscribers } from "./utils";
@@ -51,11 +52,17 @@ export async function addSubscriber({
       name,
       confirm_link,
     });
-    await sendEmail({
-      to: email,
-      subject: "Confirm your subscription to my newsletter!",
-      html: marked.parse(md) as string,
-    });
+    // TODO: handle default sender
+    const senders = await EmailsService.entities.Sender.scan.go();
+    const sender = senders.data?.[0];
+    await sendEmail(
+      {
+        to: email,
+        subject: "Confirm your subscription to my newsletter!",
+        html: marked.parse(md) as string,
+      },
+      sender,
+    );
   }
   return sub;
 }
@@ -74,11 +81,15 @@ export async function removeSubscriber(id: string) {
     .go();
 }
 
-export async function broadcast(email: string, dry: boolean) {
+export async function broadcast(
+  sender: SenderItem,
+  email: string,
+  dry: boolean,
+) {
   // TODO: validation and errors?
   const emailObj = JSON.parse(email);
   const time = new Date(emailObj.time).getTime() || 0;
-  let filter;
+  let filter: any;
   try {
     filter = getFilter(emailObj.filter);
   } catch (err) {
@@ -89,6 +100,7 @@ export async function broadcast(email: string, dry: boolean) {
   }
   // rename to send email
   const createEvent = EmailsService.entities.Event.create({
+    senderId: sender.senderId,
     payload: emailObj,
     time,
   });
@@ -103,6 +115,7 @@ export async function broadcast(email: string, dry: boolean) {
     if (!subFilter) continue;
     createEmails.push(
       EmailsService.entities.Email.create({
+        senderId: sender.senderId,
         to: sub.email,
         subscriberId: sub.subscriberId,
         eventId: event ? event.data.eventId : "dryRun",

@@ -43,7 +43,7 @@ const (
 	DONE
 )
 
-type model struct {
+type sendModel struct {
 	status Status
 
 	count     int
@@ -55,7 +55,8 @@ type model struct {
 
 	spinner spinner.Model
 	input   textinput.Model
-	prompt  list.Model
+	list    list.Model
+	p       utils.Prompt
 }
 
 var (
@@ -94,11 +95,11 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 	fmt.Fprint(w, fn(str))
 }
 
-func initModel(filePath string, filter string, time string) model {
+func initSendModel(filePath string, filter string, time string) sendModel {
 	s := spinner.New(spinner.WithSpinner(spinner.Dot))
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("63"))
 
-	m := model{
+	m := sendModel{
 		filePath: filePath,
 		input:    textinput.New(),
 		spinner:  s,
@@ -131,14 +132,16 @@ func initModel(filePath string, filter string, time string) model {
 	l.SetShowTitle(false)
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
-	m.prompt = l
+	m.list = l
+
+	m.p.LeftPadding = 6
+	m.p.Reset("Kal", "Send a new email.")
 
 	return m
 }
 
-func (m model) Init() tea.Cmd {
+func (m sendModel) Init() tea.Cmd {
 	return tea.Sequence(
-		utils.Prompt("37", "16", "Kal", "Send a new email."),
 		// TODO: start with file
 		// utils.Prompt("37", "16", "email", "Choose the email you want to send."),
 		validateEmail(m.filePath),
@@ -149,7 +152,7 @@ type item string
 
 func (i item) FilterValue() string { return "" }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m sendModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -175,10 +178,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if len(m.filter) > 0 {
 					filterString = m.filter
 				}
+				previous := m.p.Render()
+				m.p.Reset("time", "Schedule a time for the email.")
 				return m, tea.Sequence(
-					tea.Printf(primaryStyle.Render("        > %s"), filterString),
-					utils.Prompt("37", "16", "time",
-						"Schedule a time for the email."))
+					tea.Printf(previous),
+					tea.Printf(m.p.RenderAnswer(filterString)),
+				)
 			case TIME:
 				m.time = m.input.Value()
 				w := when.New(nil)
@@ -189,8 +194,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if len(m.time) > 0 {
 					r, err := w.Parse(m.time, time.Now())
 					if err != nil || r == nil {
-						// TODO: log error message
-						return m, tea.Printf("   ERROR: Invalid time.")
+						m.p.Error = "Invalid time."
+						return m, nil
 					} else {
 						m.timeValue = r.Time.Local().Format(time.RFC3339)
 						timeString = r.Time.Local().Format(time.RFC822)
@@ -199,23 +204,27 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				m.status = CHECKING
 				return m, tea.Sequence(
-					tea.Printf(primaryStyle.Render("        > %s"), timeString),
+					tea.Printf(m.p.Render()),
+					tea.Printf(m.p.RenderAnswer(timeString)),
 					checkEmail(m))
 			case PROMPT:
-				i, ok := m.prompt.SelectedItem().(item)
+				i, ok := m.list.SelectedItem().(item)
 				if ok && string(i) == "Yes" {
 					m.status = SENDING
 					return m, tea.Sequence(
-						tea.Printf("        %s %s %d %s", checkMark,
+						tea.Printf("\n        %s %s %d %s", checkMark,
 							"Email will be sent to", m.count, "subscribers."),
 						sendEmail(m))
 				} else {
 					m.status = FILTER
 					m.input.SetValue(m.filter)
 					m.input.Placeholder = "None"
+					previous := m.p.Render()
+					m.p.Reset("filter", "Enter a filter expression.")
 					return m, tea.Sequence(
-						tea.Printf("        %s", primaryStyle.Render("> Restart.")),
-						utils.Prompt("37", "16", "filter", "Enter a filter expression."))
+						tea.Printf(previous),
+						tea.Printf(m.p.RenderAnswer("Restart")),
+					)
 				}
 			}
 		}
@@ -224,14 +233,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fileData = msg.fileData
 		m.input.SetValue(m.filter)
 		m.input.Placeholder = "None"
-		return m, tea.Sequence(tea.Printf("        %s %s",
-			checkMark, "Email looks good."),
-			utils.Prompt("37", "16", "filter", "Enter a filter expression."))
+		previous := m.p.Render()
+		m.p.Reset("filter", "Enter a filter expression.")
+		return m, tea.Sequence(
+			tea.Printf(previous),
+			tea.Printf("        %s %s", checkMark, "Email looks good."),
+		)
 	case emailCheckedMsg:
 		m.status = PROMPT
 		m.count = msg.count
-		return m, utils.Prompt("37", "16", "prompt",
-			fmt.Sprintf("Do you want to send the email to %d subscribers?", m.count))
+		m.p.Reset("prompt", fmt.Sprintf("Do you want to send the email to %d subscribers?", m.count))
+		return m, nil
 	case emailSentMsg:
 		m.status = DONE
 		return m, tea.Quit
@@ -242,8 +254,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	if m.status == PROMPT {
-		var prompt, promptCmd = m.prompt.Update(msg)
-		m.prompt = prompt
+		var prompt, promptCmd = m.list.Update(msg)
+		m.list = prompt
 		return m, promptCmd
 	}
 	var input, inputCmd = m.input.Update(msg)
@@ -251,11 +263,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, inputCmd
 }
 
-func (m model) View() string {
+func (m sendModel) View() string {
 	spin := "\n        " + m.spinner.View()
 	switch m.status {
 	case DONE:
-		return doneStyle.Render(fmt.Sprintf("\n        %s Done!\n", checkMark))
+		return doneStyle.Render(fmt.Sprintf("        %s Done!\n", checkMark))
 	case VALIDATING:
 		return spin + "Validating email..."
 	case CHECKING:
@@ -263,13 +275,13 @@ func (m model) View() string {
 	case SENDING:
 		return spin + "Sending emails..."
 	case PROMPT:
-		return m.prompt.View()
+		return m.p.Render() + "\n" + m.list.View()
 	case FILE:
-		return "        " + m.input.View()
+		return m.p.Render() + "\n        " + m.input.View()
 	case FILTER:
-		return "        " + m.input.View()
+		return m.p.Render() + "\n        " + m.input.View()
 	case TIME:
-		return "        " + m.input.View()
+		return m.p.Render() + "\n        " + m.input.View()
 	}
 	return ""
 }
@@ -279,9 +291,16 @@ var sendCmd = &cobra.Command{
 	Short: "Send the email!",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		f, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatalf("error opening file: %v", err)
+		}
+		defer f.Close()
+		log.SetOutput(f)
+
 		// TODO: read filter and time from command line
 		// and also have a -y flag
-		p := tea.NewProgram(initModel(args[0], "", ""))
+		p := tea.NewProgram(initSendModel(args[0], "", ""))
 		if _, err := p.Run(); err != nil {
 			log.Fatal(err)
 		}
@@ -315,13 +334,13 @@ func validateEmail(filePath string) tea.Cmd {
 	}
 }
 
-func checkEmail(m model) tea.Cmd {
+func checkEmail(m sendModel) tea.Cmd {
 	return func() tea.Msg {
 		return emailCheckedMsg{count: checkSendEmail(m.fileData, m.filter, "", true)}
 	}
 }
 
-func sendEmail(m model) tea.Cmd {
+func sendEmail(m sendModel) tea.Cmd {
 	return func() tea.Msg {
 		checkSendEmail(m.fileData, m.filter, m.timeValue, false)
 		return emailSentMsg{}
@@ -330,6 +349,7 @@ func sendEmail(m model) tea.Cmd {
 
 func checkSendEmail(fileData string, filter string, time string, dry bool) int {
 	baseURL := viper.GetString("endpoint")
+	senderToken := viper.GetString("senderToken")
 	jsonData := map[string]interface{}{
 		"fileData": fileData,
 		"time":     time,
@@ -345,7 +365,20 @@ func checkSendEmail(fileData string, filter string, time string, dry bool) int {
 	if dry {
 		path = "/check_send"
 	}
-	response, err := http.Post(baseURL+path, "application/json", strings.NewReader(string(jsonValue)))
+
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", baseURL+path, strings.NewReader(string(jsonValue)))
+	if err != nil {
+		// Handle error
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+senderToken)
+	response, err := client.Do(req)
+	if err != nil {
+		// Handle error
+	}
+	defer response.Body.Close()
+
 	if err != nil {
 		fmt.Printf("err %s", err)
 		return 0
