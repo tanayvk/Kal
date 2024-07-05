@@ -79,31 +79,35 @@ To unsubscribe, `GET /unsub` with the `id` as a query parameter.
 
 ## Tasks and planned features
 
-- [ ] Authentication
-- [ ] Config command
-- [ ] Templates
+- [ ] Support for non-SMTP email providers
 - [ ] Support for multiple lists
-- [ ] Support for multiple users
-- [ ] Managing users and lists using CLI
-- [ ] Email deliverability
-- [ ] Support for multiple SMTP servers
+- [ ] Managing senders and lists using CLI
+- [ ] Email deliverability and concurrency
 - [ ] Sequences
 - [ ] Custom automations
 - [ ] Tracking and analytics
     - [ ] Open rates, link clicks
+    - [ ] UI for analytics
 - [ ] Styling
 - [ ] Landing page
 - [ ] Paid subscriptions
 - [ ] Bulk subscriber import
 - [ ] Referrals
 - [ ] Webhooks
-- [ ] Move out of Secrets Manager
 - [ ] Images and attachments with S3
 - [ ] Pending emails, undo send, sent logs
+- [ ] Package and release CLI separately
+
 - [x] Confirmation email
 - [x] Unsubscribing
 - [x] Scheduling emails
 - [x] Filters while sending
+- [x] Authentication
+- [x] Config command
+- [x] Templates
+- [x] Support for multiple users
+- [x] Support for multiple SMTP servers
+- [x] Move out of Secrets Manager
 
 ## FAQs
 
