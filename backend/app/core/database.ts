@@ -100,6 +100,18 @@ const Email = new Entity({
       type: "number",
       default: 0,
     },
+    opens: {
+      type: "number",
+      default: 0,
+    },
+    links: {
+      type: "any",
+      default: {},
+    },
+    linkClicks: {
+      type: "any",
+      default: {},
+    },
   },
   indexes: {
     email: {
@@ -154,6 +166,11 @@ const Event = new Entity({
     },
     time: {
       type: "number",
+      default: 0,
+    },
+    opens: {
+      type: "number",
+      default: 0,
     },
   },
   indexes: {

@@ -7,6 +7,7 @@ import { PromisePool } from "@supercharge/promise-pool";
 
 import { EmailEntity, EmailsService, SenderItem } from "./database";
 import { getSubscribers } from "./utils";
+import { X2jOptions, XMLBuilder, XMLParser } from "fast-xml-parser";
 
 const engine = new Liquid();
 
@@ -37,6 +38,44 @@ export async function sendEmail(email: Email, sender: SenderItem) {
     subject: email.subject,
     html: email.html,
   });
+}
+
+const xmlOptions: X2jOptions = {
+  ignoreAttributes: false,
+  preserveOrder: true,
+  trimValues: false,
+};
+const xmlParser = new XMLParser(xmlOptions);
+const xmlBuilder = new XMLBuilder(xmlOptions);
+
+// TODO: make analytics optional
+async function addAnalytics(html: string, email: any) {
+  let numLinks = 0;
+  const links = {};
+  const obj = xmlParser.parse(html);
+  updateLinks(obj);
+
+  function updateLinks(obj: any) {
+    if (Array.isArray(obj)) obj.forEach((o) => updateLinks(o));
+    else if (typeof obj === "object") {
+      if ({}.hasOwnProperty.call(obj, "@_href")) {
+        // skip Kal links
+        if (obj["@_href"].startsWith(Resource.Api.url)) return;
+
+        const linkKey = Buffer.from((++numLinks).toString()).toString("base64");
+        links[linkKey] = obj["@_href"];
+        obj[
+          "@_href"
+        ] = `${Resource.Api.url}/track/${email.emailId}?link=${linkKey}`;
+      } else Object.values(obj).forEach((o) => updateLinks(o));
+    }
+  }
+  const htmlWithLinks = xmlBuilder.build(obj);
+  return [
+    htmlWithLinks +
+      `<img src="${Resource.Api.url}/image/${email.emailId}.png" />`,
+    links,
+  ];
 }
 
 // run this as a cron job + when sending a email right away
@@ -107,16 +146,20 @@ export async function sender() {
           unsubscribe_link: `${Resource.Api.url}/unsub?id=${sub.subscriberId}`,
         }),
       );
+      const [htmlWithAnalytics, links] = await addAnalytics(
+        marked.parse(content.body) as string,
+        email,
+      );
       await sendEmail(
         {
           to: sub.email,
           subject: (content.attributes as any).Subject,
-          html: marked.parse(content.body) as string,
+          html: htmlWithAnalytics as string,
         },
         sender,
       );
       await EmailsService.entities.Email.update({ emailId: email.emailId })
-        .set({ status: "sent" })
+        .set({ status: "sent", links })
         .go();
     } catch (err) {
       console.log("err sending", email.emailId, err);

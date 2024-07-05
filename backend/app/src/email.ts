@@ -15,9 +15,7 @@ const getSenderId = async (event: any) => {
   const authorization =
     event.headers.Authorization || event.headers.authorization;
   const token = authorization.match(/Bearer (.*)/)?.[1];
-  console.log("authorization", authorization, token);
   const payload = await verifyJwt(token, Resource.JwtSecret.value);
-  console.log("payload", payload);
   const senderId = payload.senderId;
   if (!senderId) {
     throw new Error("No senderId.");
@@ -106,7 +104,6 @@ export const getSender = async function (event: any) {
   const sender = await EmailsService.entities.Sender.get({
     senderId: senderId,
   }).go();
-  console.log("sender", sender.data);
   return {
     senderId,
     creds: sender.data?.creds,

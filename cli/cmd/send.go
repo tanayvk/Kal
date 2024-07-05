@@ -62,6 +62,7 @@ type sendModel struct {
 var (
 	doneStyle         = lipgloss.NewStyle().Margin(0, 0)
 	checkMark         = lipgloss.NewStyle().Foreground(lipgloss.Color("42")).SetString("✓")
+	crossMark         = lipgloss.NewStyle().Foreground(lipgloss.Color("160")).SetString("✕")
 	titleStyle        = lipgloss.NewStyle().MarginLeft(2)
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(10)
 	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(8).Foreground(lipgloss.Color("39"))

@@ -185,7 +185,7 @@ func (m configModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case endpointCheckMsg:
 		if msg.failed {
 			m.status = CONFIG_STATUS_ENDPOINT
-			return m, tea.Printf("            Endpoint check failed.")
+			return m, tea.Printf("            %s Endpoint check failed.", crossMark)
 		}
 		m.status = CONFIG_STATUS_TOKEN
 		m.input.SetValue(m.token)
@@ -198,7 +198,7 @@ func (m configModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tokenCheckMsg:
 		if msg.failed {
 			m.status = CONFIG_STATUS_TOKEN
-			return m, tea.Printf("            Token check failed.")
+			return m, tea.Printf("            %s Token check failed.", crossMark)
 		}
 		m.status = CONFIG_STATUS_WRITING
 		m.host = msg.config.host

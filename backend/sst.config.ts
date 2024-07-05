@@ -74,6 +74,14 @@ export default $config({
       handler: "app/src/email.unsub",
       link: [api, emailsTable],
     });
+    api.route("GET /track/{emailId}", {
+      handler: "app/src/analytics.track",
+      link: [api, emailsTable],
+    });
+    api.route("GET /image/{email}", {
+      handler: "app/src/analytics.image",
+      link: [api, emailsTable],
+    });
 
     // sender auth
     api.route("GET /sender", {
@@ -95,7 +103,7 @@ export default $config({
 
     new sst.aws.Cron("Sender", {
       job: {
-        handler: "app/src/emails.sender",
+        handler: "app/core/emails.sender",
         link: [api, emailsTable],
         permissions: [
           {
@@ -106,5 +114,9 @@ export default $config({
       },
       schedule: "cron(*/30 10 * * ? *)",
     });
+
+    return {
+      api: api.url,
+    };
   },
 });

@@ -26,6 +26,9 @@ importers:
       electrodb:
         specifier: 2.12.1
         version: 2.12.1(@aws-sdk/client-dynamodb@3.473.0)
+      fast-xml-parser:
+        specifier: ^4.4.0
+        version: 4.4.0
       filtrex:
         specifier: ^3.0.0
         version: 3.0.0
@@ -1271,6 +1274,10 @@ packages:
 
   fast-xml-parser@4.2.5:
     resolution: {integrity: sha512-B9/wizE4WngqQftFPmdaMYlXoJlJOYxGQOanC77fq9k8+Z0v5dDSVh+3glErdIROP//s/jgb7ZuxKfB8nVyo0g==}
+    hasBin: true
+
+  fast-xml-parser@4.4.0:
+    resolution: {integrity: sha512-kLY3jFlwIYwBNDojclKsNAC12sfD6NwW74QB2CoNGPvtVxjliYehVunB3HYyNi+n4Tt1dAcgwYvmKF/Z18flqg==}
     hasBin: true
 
   fastq@1.17.1:
@@ -3966,6 +3973,10 @@ snapshots:
   fast-levenshtein@2.0.6: {}
 
   fast-xml-parser@4.2.5:
+    dependencies:
+      strnum: 1.0.5
+
+  fast-xml-parser@4.4.0:
     dependencies:
       strnum: 1.0.5
 

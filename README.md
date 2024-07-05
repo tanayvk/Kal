@@ -79,17 +79,24 @@ To unsubscribe, `GET /unsub` with the `id` as a query parameter.
 
 ## Tasks and planned features
 
+### Next Up
+
+- [ ] Tracking and analytics
+    - [ ] Open rates, link clicks
+    - [ ] UI for analytics
+- [ ] Landing page and launch
+- [ ] Getting started tutorial
+
+### TODO
+
+- [ ] Notify when a sender starts failing
 - [ ] Support for non-SMTP email providers
 - [ ] Support for multiple lists
 - [ ] Managing senders and lists using CLI
 - [ ] Email deliverability and concurrency
 - [ ] Sequences
 - [ ] Custom automations
-- [ ] Tracking and analytics
-    - [ ] Open rates, link clicks
-    - [ ] UI for analytics
 - [ ] Styling
-- [ ] Landing page
 - [ ] Paid subscriptions
 - [ ] Bulk subscriber import
 - [ ] Referrals
@@ -97,6 +104,8 @@ To unsubscribe, `GET /unsub` with the `id` as a query parameter.
 - [ ] Images and attachments with S3
 - [ ] Pending emails, undo send, sent logs
 - [ ] Package and release CLI separately
+
+### Done
 
 - [x] Confirmation email
 - [x] Unsubscribing
