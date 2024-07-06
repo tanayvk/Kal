@@ -34,6 +34,8 @@ Subject: Subject goes here
 ---
 
 A fresh *new* markdown email.
+
+[Unsubscribe]({{ unsubscribe_link }})
 `
 
 var newCmd = &cobra.Command{
