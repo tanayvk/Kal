@@ -114,9 +114,5 @@ export default $config({
       },
       schedule: "cron(*/30 10 * * ? *)",
     });
-
-    return {
-      api: api.url,
-    };
   },
 });
