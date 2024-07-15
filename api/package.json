@@ -1,0 +1,24 @@
+{
+  "name": "api",
+  "scripts": {
+    "dev": "bun run --hot src/server.ts",
+    "clean": "rm ./data.db && bun run src/migrate.ts"
+  },
+  "dependencies": {
+    "drizzle-kit": "^0.23.0",
+    "drizzle-orm": "^0.32.0",
+    "hono": "^4.4.13",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "eslint": "9.x",
+    "globals": "^15.8.0",
+    "typescript-eslint": "^7.16.0"
+  },
+  "module": "index.ts",
+  "type": "module",
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
