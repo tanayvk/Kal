@@ -15,11 +15,11 @@ export default function Login() {
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div className="flex flex-col">
-        <h1 className="text-4xl">Login to Kal.</h1>
+        <h1 className="text-4xl">Welcome to Kal.</h1>
         <div className="pt-6">
           <input
             type="text"
-            className="p-2 border-b-04 border-neutral-200 bg-neutral-900 text-neutral-50 outline-none text-5xl w-full placeholder:text-neutral-500"
+            className="p-1 border-b border-neutral-200/50 bg-neutral-900 text-neutral-50 outline-none text-5xl w-full placeholder:text-neutral-500"
             placeholder="Username."
             onChange={(e) => setUsername(e.target.value)}
           />
@@ -27,16 +27,13 @@ export default function Login() {
         <div className="pt-2">
           <input
             type="password"
-            className="p-2 border-b-04 border-neutral-200 bg-neutral-900 text-neutral-50 outline-none text-5xl w-full placeholder:text-neutral-500"
+            className="p-1 border-b border-neutral-200/50 bg-neutral-900 text-neutral-50 outline-none text-5xl w-full placeholder:text-neutral-500"
             placeholder="Password."
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <div className="pt-6">
-          <a
-            className="cursor-pointer text-3xl underline text-violet-400"
-            onClick={handleLogin}
-          >
+        <div className="pt-10">
+          <a className="link text-3xl" onClick={handleLogin}>
             Login
           </a>
         </div>
