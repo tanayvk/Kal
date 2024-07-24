@@ -5,10 +5,21 @@ import { login } from "../auth";
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(""); // State to manage the error message
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (username && password) {
-      login(username, password);
+      setLoading(true);
+      try {
+        await login(username, password);
+        setError("");
+      } catch (err) {
+        setError(err.message);
+      }
+      setLoading(false);
+    } else {
+      setError("Enter a username and password.");
     }
   };
 
@@ -32,10 +43,15 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <div className="pt-10">
-          <a className="link text-3xl" onClick={handleLogin}>
-            Login
-          </a>
+        {<div className="pt-4 text-red-500 text-xl">{error}</div>}
+        <div className="text-3xl flex items-center pt-6">
+          {loading ? (
+            <span>Logging in...</span>
+          ) : (
+            <a className="link" onClick={handleLogin}>
+              Login
+            </a>
+          )}
         </div>
       </div>
     </div>
