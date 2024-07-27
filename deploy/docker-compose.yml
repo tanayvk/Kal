@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  app:
+    image: oven/bun:latest
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    ports:
+      - "3000:3000"
+    restart: always
+    command: ["bun", "index.js", "start"]
+    networks:
+      - app-network
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/static:/usr/share/nginx/html
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - app
+    restart: always
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

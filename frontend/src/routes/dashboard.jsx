@@ -1,64 +1,108 @@
-// TODO: actions
-//
-// send an email
-// manage senders
-// create sender
-// view analytics
-// settings
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Fuse from "fuse.js";
 
 const actions = [
   {
-    category: "Emails",
+    title: "Create Email",
     text: "Create a new email.",
+    route: "/create-email",
   },
   {
-    category: "Emails",
-    text: "Send an email.",
+    title: "Emails",
+    text: "View, edit and send emails.",
+    route: "/emails",
   },
   {
-    category: "Senders",
-    text: "Create a new sender.",
+    title: "Subscribers",
+    text: "Manage subscribers.",
+    route: "/subscribers",
   },
   {
-    category: "Senders",
-    text: "Manage senders.",
-  },
-  {
-    category: "SMTP",
-    text: "Configure a new SMTP server.",
-  },
-  {
-    category: "SMTP",
-    text: "Manage SMTP servers.",
-  },
-  {
-    category: "Templates",
+    title: "Create Email Template",
     text: "Create a new email template.",
+    route: "/create-template",
   },
   {
-    category: "Templates",
+    title: "Email Templates",
     text: "Manage email templates.",
+    route: "/templates",
+  },
+  {
+    title: "Create Sender",
+    text: "Create a new sender.",
+    route: "/create-sender",
+  },
+  {
+    title: "Senders",
+    text: "View, edit and delete senders.",
+    route: "/senders",
+  },
+  {
+    title: "Configure SMTP Server",
+    text: "Configure a new SMTP server.",
+    route: "/create-smtp",
+  },
+  {
+    title: "SMTP Servers",
+    text: "Manage SMTP servers.",
+    route: "/smtp",
+  },
+  {
+    title: "Lists",
+    text: "Manage lists.",
+    route: "/create-list",
+  },
+  {
+    title: "Create List",
+    text: "Create a new list.",
+    route: "/lists",
+  },
+  {
+    title: "Settings",
+    text: "Configure Kal settings.",
+    route: "/settings",
   },
 ];
 
+// TODO: show fuzzy matches in text
+const fuse = new Fuse(actions, {
+  keys: ["title", "text"],
+  shouldSort: true,
+  includeMatches: true,
+});
+
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+  const filteredActions = query
+    ? fuse.search(query).map(({ item }) => item)
+    : actions;
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="flex flex-col gap-10 container px-4 md:px-0">
-        <h1 class="text-4xl text-center">Email marketing made fast.</h1>
-        <div class="flex flex-col w-full md:w-2/3 2xl:w-1/2 mx-auto bg-neutral-800 rounded-lg border-2 border-neutral-600">
+    <div className="flex-grow flex items-center justify-center">
+      <div className="space-y-10 container px-4 md:px-0">
+        <h1 className="text-4xl text-center">Email marketing made fast.</h1>
+        <div className="overflow-scroll w-full md:w-2/3 2xl:w-1/2 mx-auto bg-neutral-800 rounded-lg border-2 border-neutral-600">
           <div>
             <input
               className="w-full bg-neutral-800 text-2xl my-2 px-3 py-2 outline-none border-none"
               type="text"
               placeholder="I want to..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-          <div className="divide-neutral-600 divide-y">
-            {actions.map((action) => (
-              <div className="group flex flex-col cursor-pointer w-full py-1 px-3 hover:bg-gray-600/30">
+          <div className="h-[1px] w-full mx-auto bg-neutral-700"></div>
+          <div className="h-[50vh]  overflow-scroll divide-neutral-600 divide-y">
+            {filteredActions.map((action) => (
+              <div
+                onClick={() => {
+                  if (action.route) navigate(action.route);
+                }}
+                className="group flex flex-col cursor-pointer w-full py-1 px-3 hover:bg-gray-600/30"
+              >
                 <span className="group-hover:underline font-semibold text-lg">
-                  {action.category}
+                  {action.title}
                 </span>
                 <span className="text-md">{action.text}</span>
               </div>

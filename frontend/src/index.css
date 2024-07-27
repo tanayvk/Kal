@@ -3,3 +3,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.link {
+  @apply cursor-pointer underline hover:text-gray-200;
+}
+
+.input {
+  @apply w-full bg-neutral-800 text-2xl px-3 py-2 outline-none border-none;
+}

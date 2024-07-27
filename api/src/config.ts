@@ -21,3 +21,10 @@ export async function getSecret() {
     return newSecret;
   }
 }
+
+export async function getDefaultSender() {
+  const config = await db.query.config.findFirst({
+    columns: { defaultSender: true },
+  });
+  return config?.defaultSender;
+}
