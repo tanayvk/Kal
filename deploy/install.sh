@@ -11,7 +11,7 @@ mkdir -p $temp_dir
 cd $temp_dir
 
 curl -# -L $KAL_URL -o kal.zip
-unzip kal.zip -d $INSTALL_DIR
+unzip kal.zip -d $INSTALL_DIR > /dev/null
 
 cd $INSTALL_DIR
 docker-compose up -d
