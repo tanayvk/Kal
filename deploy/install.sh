@@ -16,7 +16,7 @@ unzip kal.zip -d $INSTALL_DIR > /dev/null
 cd $INSTALL_DIR
 docker-compose up -d
 
-docker-compose exec app bash -c "bun run /app/index.js init"
+docker-compose exec -i app bash -c "bun run /app/index.js init"
 
 cd $current_dir
 rm -rf $temp_dir
