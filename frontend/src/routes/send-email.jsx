@@ -9,8 +9,10 @@ import { parseDate } from "chrono-node";
 
 import Input from "@/components/Input";
 import Listbox from "@/components/Listbox";
+import Button from "@/components/Button";
 import { useSenders, sendEmail } from "@/api";
 import Page from "@/components/Page";
+import { setSentEmails } from "@/stores/sent-email";
 
 function Send() {
   const navigate = useNavigate();
@@ -18,7 +20,6 @@ function Send() {
   const [filter, setFilter] = useState("");
   const [time, setTime] = useState("");
   const [timestamp, setTimestamp] = useState("");
-  console.log("time", timestamp);
   const [sender, setSender] = useState(null);
   const [loading, setLoading] = useState(false);
   const { data: sendersData } = useSenders();
@@ -41,6 +42,7 @@ function Send() {
       queryClient.invalidateQueries("senders");
       setLoading(false);
       navigate("/emails");
+      setSentEmails(12);
     },
     onError: () => {
       setLoading(false);
@@ -100,19 +102,9 @@ function Send() {
         />
       </div>
       <div className="mt-6 space-x-2">
-        {loading ? (
-          <span>Sending...</span>
-        ) : (
-          <button
-            className="link text-green-400 hover:text-green-300"
-            onClick={handleSubmit}
-          >
-            Send
-          </button>
-        )}
-        <button className="link text-violet-400 hover:text-violet-300">
-          Preview
-        </button>
+        <Button onClick={handleSubmit} loading={loading}>
+          Send
+        </Button>
       </div>
     </div>
   );

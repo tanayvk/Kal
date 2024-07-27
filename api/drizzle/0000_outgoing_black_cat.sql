@@ -15,8 +15,8 @@ CREATE TABLE `config` (
 CREATE TABLE `emails` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`type` text,
-	`subject` text,
-	`body` text,
+	`subject` text NOT NULL,
+	`body` text NOT NULL,
 	`created_by` integer,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
 	`updated_at` text,

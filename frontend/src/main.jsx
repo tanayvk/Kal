@@ -17,7 +17,7 @@ const queryClient = new QueryClient({
 });
 
 import "./index.css";
-import { logout, useLoggedIn } from "./auth";
+import { logout, useLoggedIn } from "@/stores/auth";
 import Root from "./routes/root";
 import Dashboard from "./routes/dashboard";
 import CreateEmail from "./routes/create-email";

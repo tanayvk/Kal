@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Fuse from "fuse.js";
-import { useEffect } from "react";
-import { setPageTitle } from "../page";
 
 const actions = [
   {
@@ -14,6 +12,21 @@ const actions = [
     title: "Emails",
     text: "View, edit and send emails.",
     route: "/emails",
+  },
+  {
+    title: "Subscribers",
+    text: "Manage subscribers.",
+    route: "/subscribers",
+  },
+  {
+    title: "Create Email Template",
+    text: "Create a new email template.",
+    route: "/create-template",
+  },
+  {
+    title: "Email Templates",
+    text: "Manage email templates.",
+    route: "/templates",
   },
   {
     title: "Create Sender",
@@ -34,21 +47,6 @@ const actions = [
     title: "SMTP Servers",
     text: "Manage SMTP servers.",
     route: "/smtp",
-  },
-  {
-    title: "Subscribers",
-    text: "Manage subscribers.",
-    route: "/subscribers",
-  },
-  {
-    title: "Create Email Template",
-    text: "Create a new email template.",
-    route: "/create-template",
-  },
-  {
-    title: "Email Templates",
-    text: "Manage email templates.",
-    route: "/templates",
   },
   {
     title: "Lists",
@@ -80,9 +78,6 @@ export default function Dashboard() {
   const filteredActions = query
     ? fuse.search(query).map(({ item }) => item)
     : actions;
-  useEffect(() => {
-    setPageTitle("Dashboard");
-  }, []);
   return (
     <div className="flex-grow flex items-center justify-center">
       <div className="space-y-10 container px-4 md:px-0">

@@ -1,4 +1,4 @@
-const CircularProgress = ({ color = "text-violet-500", height = "" }) => (
+const CircularProgress = ({ color = "text-white/60", height = "" }) => (
   <div
     className={`${height || "h-full"} w-full flex items-center justify-center`}
   >

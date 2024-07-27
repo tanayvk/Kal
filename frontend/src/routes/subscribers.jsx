@@ -17,7 +17,7 @@ function SubList() {
 
   const subs = data.data;
   return (
-    <div className="w-full h-[80vh] overflow-scroll mx-auto space-y-2">
+    <div className="w-full mx-auto space-y-2">
       {subs.map((sub) => (
         <div className="flex" key={sub.id}>
           <Link className="hover:underline" to={`/subscriber/${sub.id}`}>

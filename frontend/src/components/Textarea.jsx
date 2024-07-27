@@ -19,6 +19,7 @@ export default function TextareaField({
             "mt-3 block w-full resize-none rounded-lg border-none dark:bg-white/5 py-1.5 px-3 text-sm/6 dark:text-white",
             "focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 dark:data-[focus]:outline-white/25",
             className || "",
+            "placeholder:opacity-60",
           )}
           {...rest}
         />

@@ -58,7 +58,7 @@ export default function MyListbox({
               <ListboxOption
                 key={keyFn(option)}
                 value={valueFn(option)}
-                className="group flex cursor-default items-center gap-2 rounded-lg py-1.5 px-3 select-none data-[focus]:bg-white/10"
+                className="cursor-pointer group flex items-center gap-2 rounded-lg py-1.5 px-3 select-none data-[focus]:bg-white/10"
               >
                 <div className="text-sm/6 text-white">{displayFn(option)}</div>
               </ListboxOption>

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
+import { useNavigate } from "react-router-dom";
 
 import Input from "@/components/Input";
 import * as api from "@/api";
-import { useNavigate } from "react-router-dom";
+import Button from "@/components/Button";
 
 const EditSMTP = ({ smtpServer }) => {
   const navigate = useNavigate();
@@ -80,13 +81,9 @@ const EditSMTP = ({ smtpServer }) => {
         />
       </div>
       <div className="mt-6">
-        {loading ? (
-          <span>{smtpServer ? "Updating..." : "Creating..."}</span>
-        ) : (
-          <button className="link" onClick={handleSubmit}>
-            {smtpServer ? "Update" : "Create"}
-          </button>
-        )}
+        <Button onClick={handleSubmit} loading={loading}>
+          {smtpServer ? "Update" : "Create"}
+        </Button>
       </div>
     </div>
   );

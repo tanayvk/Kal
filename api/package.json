@@ -6,7 +6,9 @@
   },
   "dependencies": {
     "@types/nodemailer": "^6.4.15",
+    "@types/readline-sync": "^1.4.8",
     "@types/uuid": "^10.0.0",
+    "commander": "^12.1.0",
     "drizzle-kit": "^0.23.0",
     "drizzle-orm": "^0.32.0",
     "filtrex": "^3.0.0",
@@ -15,6 +17,7 @@
     "liquidjs": "^10.15.0",
     "marked": "^13.0.2",
     "nodemailer": "^6.9.14",
+    "readline-sync": "^1.4.10",
     "uuid": "^10.0.0"
   },
   "devDependencies": {

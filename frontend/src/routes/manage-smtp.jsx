@@ -41,7 +41,7 @@ function SMTPList() {
     );
   const servers = data.data;
   return (
-    <div className="w-full h-[80vh] overflow-scroll mx-auto space-y-2">
+    <div className="w-full mx-auto space-y-2">
       {servers.map((server) => (
         <div className="py-2">
           <div className="flex items-center" key={server.id}>

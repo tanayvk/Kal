@@ -1,5 +1,5 @@
-import * as api from "./api";
-import { createStore } from "./zustand";
+import * as api from "@/api";
+import { createStore } from "@/zustand";
 
 const useAuth = createStore((set) => ({
   username: localStorage.getItem("username") || null,

@@ -1,19 +1,18 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "react-query";
 
 import Input from "@/components/Input";
 import Switch from "@/components/Switch";
 import Listbox from "@/components/Listbox";
+import Button from "@/components/Button";
 import { useConfig, useSmtpServers, updateSender, createSender } from "@/api";
-import { useNavigate } from "react-router-dom";
 
 const EditSender = ({ sender }) => {
   const navigate = useNavigate();
   const {
     data: { data: config },
   } = useConfig();
-  console.log("donc", config);
   const { data: smtpServersData } = useSmtpServers();
   const smtpServers = smtpServersData?.data || [];
   const [from, setFrom] = useState(sender?.from || "");
@@ -94,13 +93,9 @@ const EditSender = ({ sender }) => {
         />
       </div>
       <div className="mt-6">
-        {loading ? (
-          <span>{sender ? "Updating..." : "Creating..."}</span>
-        ) : (
-          <button className="link" onClick={handleSubmit}>
-            {sender ? "Update" : "Create"}
-          </button>
-        )}
+        <Button onClick={handleSubmit} loading={loading}>
+          {sender ? "Update" : "Create"}
+        </Button>
       </div>
     </div>
   );

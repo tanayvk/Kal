@@ -4,8 +4,11 @@ import moment from "moment";
 
 import * as api from "@/api";
 import Page from "@/components/Page";
+import Dialog from "@/components/Dialog";
+import { setSentEmails, useSentEmails } from "@/stores/sent-email";
 
 function EmailsList() {
+  const sentEmails = useSentEmails();
   const { data } = api.useEmails();
   const queryClient = useQueryClient();
   const deleteMutation = useMutation(api.deleteEmail, {
@@ -41,7 +44,7 @@ function EmailsList() {
   };
   const emails = data.data;
   return (
-    <div className="divide-y divide-neutral-700 w-full h-[80vh] overflow-scroll mx-auto">
+    <div className="divide-y divide-neutral-700 w-full mx-auto">
       {emails.map((email) => (
         <div className="py-2">
           <div className="flex items-center" key={email.id}>
@@ -74,6 +77,14 @@ function EmailsList() {
           </div>
         </div>
       ))}
+      <Dialog
+        isOpen={typeof sentEmails === "number"}
+        title="You're all set"
+        description={`Emails will be sent to ${sentEmails} subscriber${
+          sentEmails === 1 ? "" : "s"
+        }.`}
+        onOkay={() => setSentEmails(null)}
+      />
     </div>
   );
 }

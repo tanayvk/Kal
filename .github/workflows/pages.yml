@@ -48,6 +48,10 @@ jobs:
         run: pnpm run build
         working-directory: ./site
 
+      - name: Copy Install.sh
+        run: cp install.sh ../site/dist
+        working-directory: ./deploy
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

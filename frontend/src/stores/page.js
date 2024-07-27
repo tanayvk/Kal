@@ -1,4 +1,4 @@
-import { createStore } from "./zustand";
+import { createStore } from "@/zustand";
 
 const usePage = createStore((set) => ({
   title: "",
