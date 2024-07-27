@@ -26,22 +26,7 @@ async function start() {
   Bun.serve(server);
 }
 
-async function init() {
-  console.log("Let's create a user to access Kal.");
-  const username = await askQuestion("Enter a username: ");
-  let password;
-  let confirmPassword;
-  do {
-    password = await askQuestion("Enter a password: ");
-    confirmPassword = password;
-    // TODO: mask password + confirm
-    // confirmPassword = readlineSync.question("Confirm password: ", {
-    //   hideEchoBack: true,
-    // });
-    // if (password !== confirmPassword) {
-    //   console.error("Passwords do not match. Please try again.");
-    // }
-  } while (password !== confirmPassword);
+async function init(username: string, password: string) {
   try {
     await createUser(username, password);
     console.log(`User '${username}' created successfully.`);
@@ -53,5 +38,13 @@ async function init() {
 }
 
 program.command("start").description("Start Kal.").action(start);
-program.command("init").description("Init Kal.").action(init);
+program
+  .command("init")
+  .description("Initialize Kal.")
+  .requiredOption("-u, --username <username>", "Username for the new user")
+  .requiredOption("-p, --password <password>", "Password for the new user")
+  .action((cmdObj) => {
+    const { username, password } = cmdObj;
+    init(username, password);
+  });
 program.parse(process.argv);

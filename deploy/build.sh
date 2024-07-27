@@ -19,7 +19,7 @@ cp -r drizzle "$temp_dir/app"
 cd ../frontend
 pnpm run build
 mkdir -p "$temp_dir/nginx"
-cp -r dist "$temp_dir/static"
+cp -r dist "$temp_dir/nginx"
 
 # deploy
 
