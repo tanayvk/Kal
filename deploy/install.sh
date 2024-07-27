@@ -6,7 +6,7 @@ mkdir -p $INSTALL_DIR
 
 KAL_URL="https://github.com/tanayvk/Kal/releases/latest/download/linux.zip"
 
-temp_dir="/tmp/$(date +%s%N | base64 | tr -dc 'a-zA-Z0-9' | head -c 8)"
+temp_dir="/tmp/$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13; echo)"
 mkdir -p $temp_dir
 cd $temp_dir
 
@@ -14,7 +14,7 @@ curl -# -L $KAL_URL -o kal.zip
 unzip kal.zip -d $INSTALL_DIR > /dev/null
 
 cd $INSTALL_DIR
-docker-compose up -d
+docker compose up -d
 
 echo "Let's create a user to access Kal."
 
@@ -29,7 +29,7 @@ while true; do
   echo "Passwords do not match. Please try again."
 done
 
-docker-compose exec -T app bash -c "bun run /app/index.js init -u $USER -p $PASS"
+docker compose exec -T app bash -c "bun run /app/index.js init -u $USER -p $PASS"
 
 cd $current_dir
 rm -rf $temp_dir

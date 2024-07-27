@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 current_dir=$(pwd)
-temp_dir="/tmp/$(date +%s%N | base64 | tr -dc 'a-zA-Z0-9' | head -c 8)"
+temp_dir="/tmp/$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13; echo)"
+echo $temp_dir
 output=$(realpath $1)
 
 
@@ -18,8 +19,8 @@ cp -r drizzle "$temp_dir/app"
 
 cd ../frontend
 pnpm run build
-mkdir -p "$temp_dir/nginx"
-cp -r dist "$temp_dir/nginx"
+mkdir -p "$temp_dir/nginx/static"
+cp -r dist/* "$temp_dir/nginx/static"
 
 # deploy
 
