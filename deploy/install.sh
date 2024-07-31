@@ -43,7 +43,7 @@ while true; do
               certbot/certbot certonly -n -d $DOMAIN --webroot \
               --agree-tos --email $EMAIL -w "/var/www/html"
 
-  if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+  if sudo [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
     echo -e "${GREEN}SSL certificates were successfully created!${NC}"
     break
   else
