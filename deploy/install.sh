@@ -16,6 +16,22 @@ unzip kal.zip -d $INSTALL_DIR > /dev/null
 cd $INSTALL_DIR
 docker compose up -d
 
+echo "Let's setup SSL."
+
+read -p "Enter the domain that's pointing to this server:" DOMAIN
+read -p "Enter an operator email: " EMAIL
+
+sudo docker run -it --rm --name certbot \
+            -v "/etc/letsencrypt:/etc/letsencrypt" \
+            -v "/var/lib/letsencrypt:/var/lib/letsencrypt" \
+            -v "$INSTALL_DIR/nginx/static:/var/www/html" \
+            certbot/certbot certonly -n -d $DOMAIN --web-root \
+            --agree-tos --email $EMAIL -w "/var/www/html"
+
+cp $INSTALL_DIR/nginx/nginx-ssl.conf $INSTALL_DIR/nginx/nginx.conf
+sed -i "s/DOMAIN/$DOMAIN/g" $INSTALL_DIR/nginx/nginx.conf
+docker compose restart nginx
+
 echo "Let's create a user to access Kal."
 
 read -p "Enter your username: " USER
