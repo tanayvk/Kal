@@ -43,7 +43,7 @@ while true; do
               -v "/var/lib/letsencrypt:/var/lib/letsencrypt" \
               -v "$INSTALL_DIR/nginx/static:/var/www/html" \
               certbot/certbot certonly -n -d $DOMAIN --webroot \
-              --agree-tos --email $EMAIL -w "/var/www/html" > /dev/null 2>&1
+              --agree-tos --email $EMAIL -w "/var/www/html"
 
   if sudo [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
     echo -e "${GREEN}SSL certificates were successfully created!${NC}"
