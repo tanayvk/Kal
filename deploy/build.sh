@@ -27,6 +27,7 @@ cp -r dist/* "$temp_dir/nginx/static"
 cd ../deploy
 cp ./docker-compose.yml "$temp_dir"
 cp ./nginx.conf "$temp_dir/nginx"
+cp ./nginx-ssl.conf "$temp_dir/nginx"
 
 # zip
 cd $temp_dir

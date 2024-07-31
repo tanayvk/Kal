@@ -25,7 +25,7 @@ sudo docker run -it --rm --name certbot \
             -v "/etc/letsencrypt:/etc/letsencrypt" \
             -v "/var/lib/letsencrypt:/var/lib/letsencrypt" \
             -v "$INSTALL_DIR/nginx/static:/var/www/html" \
-            certbot/certbot certonly -n -d $DOMAIN --web-root \
+            certbot/certbot certonly -n -d $DOMAIN --webroot \
             --agree-tos --email $EMAIL -w "/var/www/html"
 
 cp $INSTALL_DIR/nginx/nginx-ssl.conf $INSTALL_DIR/nginx/nginx.conf
