@@ -29,8 +29,6 @@ async function start() {
 async function init(username: string, password: string) {
   try {
     await createUser(username, password);
-    console.log(`User '${username}' created successfully.`);
-    console.log(`You can now login to Kal.`);
   } catch (error) {
     console.error("Error creating user:", error);
   }

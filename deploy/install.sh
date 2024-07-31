@@ -36,12 +36,14 @@ while true; do
   read -p "Enter the domain that's pointing to this server: " DOMAIN
   read -p "Enter an operator email: " EMAIL
 
+  echo -e "${BLUE}Requesting SSL certificates from Let's Encrypt...${NC}"
+
   sudo docker run -it --rm --name certbot \
               -v "/etc/letsencrypt:/etc/letsencrypt" \
               -v "/var/lib/letsencrypt:/var/lib/letsencrypt" \
               -v "$INSTALL_DIR/nginx/static:/var/www/html" \
               certbot/certbot certonly -n -d $DOMAIN --webroot \
-              --agree-tos --email $EMAIL -w "/var/www/html"
+              --agree-tos --email $EMAIL -w "/var/www/html" > /dev/null 2>&1
 
   if sudo [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
     echo -e "${GREEN}SSL certificates were successfully created!${NC}"
