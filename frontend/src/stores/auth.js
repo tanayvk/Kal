@@ -2,20 +2,24 @@ import * as api from "@/api";
 import { createStore } from "@/zustand";
 
 const useAuth = createStore((set) => ({
-  username: localStorage.getItem("username") || null,
+  username: localStorage.getItem("kal-username") || null,
+  token: localStorage.getItem("kal-token") || null,
   login: (username, token) => {
     if (username) {
-      localStorage.setItem("username", username);
-      localStorage.setItem("token", token);
+      localStorage.setItem("kal-username", username);
+      localStorage.setItem("kal-token", token);
       set((state) => {
         state.username = username;
+        state.token = token;
       });
     }
   },
   logout: () => {
-    localStorage.removeItem("username");
+    localStorage.removeItem("kal-username");
+    localStorage.removeItem("kal-token");
     set((state) => {
       state.username = null;
+      state.token = null;
     });
   },
 }));
@@ -42,3 +46,5 @@ export const logout = () => {
 };
 
 export const useUsername = () => useAuth((state) => state.username);
+
+export const getToken = () => useAuth.getState().token;

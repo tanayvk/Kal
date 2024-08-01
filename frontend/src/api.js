@@ -1,13 +1,8 @@
 import { useQuery } from "react-query";
 import axios from "axios";
+import { getToken } from "./stores/auth";
 
 const API_ENDPOINT = import.meta.env.DEV ? "http://localhost:3000/api" : "/api";
-
-let token;
-const getToken = () => {
-  if (token) return token;
-  return (token = localStorage.getItem("token"));
-};
 
 export const login = async (username, password) => {
   const response = await fetch(`${API_ENDPOINT}/token`, {
