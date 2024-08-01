@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "react-query";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,9 @@ import Button from "@/components/Button";
 import { useSenders, sendEmail } from "@/api";
 import Page from "@/components/Page";
 import { setSentEmails } from "@/stores/sent-email";
+import ListSelector from "../components/ListSelector";
+import { debounce } from "../utils/debounce";
+import { getSubs } from "../api";
 
 function Send() {
   const navigate = useNavigate();
@@ -25,6 +28,27 @@ function Send() {
   const { data: sendersData } = useSenders();
   const senders = sendersData?.data || [];
   const queryClient = useQueryClient();
+  const [lists, setLists] = useState([]);
+  const [subs, setSubs] = useState(0);
+  const [subsLoading, setSubsLoading] = useState(true);
+
+  const sendingTime = (
+    timestamp ? moment(timestamp) : moment(new Date())
+  ).format("MMMM Do YYYY, h:mm A Z");
+
+  const computeSubs = useCallback(
+    debounce(async () => {
+      setSubsLoading(true);
+      try {
+        const count = await getSubs({ lists, filter });
+        setSubs(count.data);
+      } catch (err) {
+        console.error("err fetching subs", err);
+      }
+      setSubsLoading(false);
+    }, 1000),
+    [],
+  );
 
   useEffect(() => {
     if (time) {
@@ -34,6 +58,11 @@ function Send() {
       setTimestamp(new Date());
     }
   }, [time]);
+
+  useEffect(() => {
+    computeSubs();
+  }, [filter, lists]);
+
   const mutation = useMutation(sendEmail, {
     onMutate: () => {
       setLoading(true);
@@ -42,7 +71,7 @@ function Send() {
       queryClient.invalidateQueries("senders");
       setLoading(false);
       navigate("/emails");
-      setSentEmails(12);
+      setSentEmails(subs);
     },
     onError: () => {
       setLoading(false);
@@ -54,6 +83,7 @@ function Send() {
       senderId: sender.id,
       filter,
       time,
+      lists,
     };
     mutation.mutate(emailData);
   };
@@ -80,11 +110,24 @@ function Send() {
           defaultText="Select Sender"
         />
         <Input
-          label="Filter"
+          label={
+            <div>
+              <span>Filter</span>
+            </div>
+          }
           description="Set a filter to send an email to subscribers that match a condition."
           value={filter}
           placeholder="age > 32"
           onChange={(e) => setFilter(e.target.value)}
+        />
+        <ListSelector
+          label="Lists"
+          description="Choose the lists that you want to send this email to."
+          selected={lists}
+          setSelected={(list, v) => {
+            if (v) setLists([...lists, list]);
+            else setLists(lists.filter((l) => list !== l));
+          }}
         />
         <Input
           label="Time"
@@ -92,19 +135,20 @@ function Send() {
           value={time}
           onChange={(e) => setTime(e.target.value)}
           placeholder="tomorrow at 5:30 PM"
-          preview={
-            timestamp
-              ? `Email will be sent at ${moment(timestamp).format(
-                  "MMMM Do YYYY, h:mm A Z",
-                )}.`
-              : "Invalid time."
-          }
+          preview={!timestamp && "Invalid time."}
         />
       </div>
-      <div className="mt-6 space-x-2">
+      <div className="flex mt-6 items-center">
         <Button onClick={handleSubmit} loading={loading}>
           Send
         </Button>
+        <span className="text-sm text-white/60 pl-2">
+          {subsLoading
+            ? "Loading..."
+            : `Email will be sent to ${subs} subscriber${
+                subs === 1 ? "" : "s"
+              } at ${sendingTime}.`}
+        </span>
       </div>
     </div>
   );

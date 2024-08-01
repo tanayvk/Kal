@@ -25,11 +25,17 @@ import Login from "./routes/login";
 import ManageSenders from "./routes/manage-senders";
 import ManageSMTP from "./routes/manage-smtp";
 import ManageEmails from "./routes/manage-emails";
+import ManageLists from "./routes/manage-lists";
+import ManageTemplates from "./routes/manage-templates";
 import CreateSender from "./routes/create-sender";
 import CreateSMTP from "./routes/create-smtp";
+import CreateList from "./routes/create-list";
+import CreateTemplate from "./routes/create-template";
 import EditSender from "./routes/edit-sender";
 import EditSMTP from "./routes/edit-smtp";
 import EditEmail from "./routes/edit-email";
+import EditList from "./routes/edit-list";
+import EditTemplate from "./routes/edit-template";
 import SendEmail from "./routes/send-email";
 import Subscribe from "./routes/subscribe";
 import Subscribers from "./routes/subscribers";
@@ -109,6 +115,36 @@ function Router() {
           path: "/settings",
           loader: authLoader,
           element: <Settings />,
+        },
+        {
+          path: "/create-template",
+          loader: authLoader,
+          element: <CreateTemplate />,
+        },
+        {
+          path: "/templates",
+          loader: authLoader,
+          element: <ManageTemplates />,
+        },
+        {
+          path: "/templates/:id",
+          loader: authLoader,
+          element: <EditTemplate />,
+        },
+        {
+          path: "/create-list",
+          loader: authLoader,
+          element: <CreateList />,
+        },
+        {
+          path: "/lists",
+          loader: authLoader,
+          element: <ManageLists />,
+        },
+        {
+          path: "/lists/:id",
+          loader: authLoader,
+          element: <EditList />,
         },
       ],
     },

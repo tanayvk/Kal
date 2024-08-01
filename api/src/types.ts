@@ -18,6 +18,7 @@ type SendEmailEvent = {
   sender: number;
   email: number;
   filter: string;
+  lists: number[];
 };
 
 type ConfirmationEmailEvent = {

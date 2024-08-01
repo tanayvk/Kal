@@ -51,12 +51,12 @@ const actions = [
   {
     title: "Lists",
     text: "Manage lists.",
-    route: "/create-list",
+    route: "/lists",
   },
   {
     title: "Create List",
     text: "Create a new list.",
-    route: "/lists",
+    route: "/create-list",
   },
   {
     title: "Settings",

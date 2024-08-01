@@ -48,6 +48,17 @@ export const useSubscribers = () => {
   });
 };
 
+export const useLists = () => {
+  return useQuery("lists", async () => {
+    const response = await axios.get(`${API_ENDPOINT}/lists`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    return response.data;
+  });
+};
+
 export const useConfig = () => {
   return useQuery(["config"], async () => {
     const response = await axios.get(`${API_ENDPOINT}/config`, {
@@ -62,6 +73,17 @@ export const useConfig = () => {
 export const useEmail = (id) => {
   return useQuery(["emails", id], async () => {
     const response = await axios.get(`${API_ENDPOINT}/emails/${id}`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    return response.data;
+  });
+};
+
+export const useList = (id) => {
+  return useQuery(["lists", id], async () => {
+    const response = await axios.get(`${API_ENDPOINT}/lists/${id}`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },
@@ -160,6 +182,24 @@ export const updateSender = async ({ id, senderData }) => {
   return response.data;
 };
 
+export const createList = async (listData) => {
+  const response = await axios.post(`${API_ENDPOINT}/lists`, listData, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  return response.data;
+};
+
+export const updateList = async ({ id, listData }) => {
+  const response = await axios.put(`${API_ENDPOINT}/lists/${id}`, listData, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  return response.data;
+};
+
 export const createEmail = async (emailData) => {
   const response = await axios.post(`${API_ENDPOINT}/emails`, emailData, {
     headers: {
@@ -171,6 +211,15 @@ export const createEmail = async (emailData) => {
 
 export const updateEmail = async ({ id, emailData }) => {
   const response = await axios.put(`${API_ENDPOINT}/emails/${id}`, emailData, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  return response.data;
+};
+
+export const deleteList = async (id) => {
+  const response = await axios.delete(`${API_ENDPOINT}/lists/${id}`, {
     headers: {
       Authorization: `Bearer ${getToken()}`,
     },
@@ -205,13 +254,14 @@ export const deleteSmtpServer = async (id) => {
   return response.data;
 };
 
-export const sendEmail = async ({ id, senderId, filter, time }) => {
+export const sendEmail = async ({ id, senderId, filter, time, lists }) => {
   const response = await axios.post(
     `${API_ENDPOINT}/emails/${id}/send`,
     {
       senderId,
       filter,
       time,
+      lists,
     },
     {
       headers: {
@@ -227,5 +277,21 @@ export const subscribe = async ({ name, email }) => {
     name,
     email,
   });
+  return response.data;
+};
+
+export const getSubs = async ({ lists, filter }) => {
+  const response = await axios.post(
+    `${API_ENDPOINT}/subs/check`,
+    {
+      lists,
+      filter,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    },
+  );
   return response.data;
 };

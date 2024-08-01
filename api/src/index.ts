@@ -1,4 +1,3 @@
-import { createInterface } from "readline";
 import { Command } from "commander";
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 
@@ -7,15 +6,6 @@ import { startSender } from "./sender";
 import db from "./database";
 import server from "./server";
 import { createUser } from "./auth";
-
-const rl = createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
-async function askQuestion(query: string): Promise<string> {
-  return new Promise((resolve) => rl.question(query, resolve));
-}
 
 const program = new Command();
 

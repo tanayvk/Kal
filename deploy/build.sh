@@ -12,7 +12,7 @@ cd ../api
 
 # api
 
-bun build src/index.ts --target bun --outdir "$temp_dir/app"
+bun build src/index.ts --target bun --outdir "$temp_dir/app" --define "import.meta.prod=true"
 cp -r drizzle "$temp_dir/app"
 
 # frontend

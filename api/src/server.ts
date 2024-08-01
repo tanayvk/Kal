@@ -9,9 +9,12 @@ import {
   subscribers,
   emails,
   config,
+  subscriptions,
+  lists as listsTable,
 } from "./schema";
 import { validateToken, comparePassword, generateToken } from "./auth";
 import { pushEvent } from "./events";
+import { getFilter } from "./filter";
 
 const app = new Hono();
 
@@ -175,6 +178,12 @@ app.post("/api/subscribe", async (c) => {
   });
 });
 
+app.post("/api/lists", validateToken, async (c) => {
+  const { title, description } = await c.req.json();
+  await db.insert(listsTable).values({ title, description });
+  return c.json({ data: null });
+});
+
 app.post("/api/emails", validateToken, async (c) => {
   const { type, subject, body } = await c.req.json();
   // @ts-expect-error TODO wtf is this get overload error
@@ -191,6 +200,17 @@ app.get("/api/emails", validateToken, async (c) => {
   return c.json({ data: emailList });
 });
 
+app.get("/api/lists/:id", validateToken, async (c) => {
+  const id = c.req.param("id");
+  const list = (
+    await db
+      .select()
+      .from(listsTable)
+      .where(sql`id = ${id}`)
+  )[0];
+  return c.json({ data: list });
+});
+
 app.get("/api/emails/:id", validateToken, async (c) => {
   const id = c.req.param("id");
   const email = (
@@ -202,9 +222,25 @@ app.get("/api/emails/:id", validateToken, async (c) => {
   return c.json({ data: email });
 });
 
+app.delete("/api/lists/:id", validateToken, async (c) => {
+  const id = c.req.param("id");
+  await db.delete(listsTable).where(sql`id = ${id}`);
+  return c.json({ data: null });
+});
+
 app.delete("/api/emails/:id", validateToken, async (c) => {
   const id = c.req.param("id");
   await db.delete(emails).where(sql`id = ${id}`);
+  return c.json({ data: null });
+});
+
+app.put("/api/lists/:id", validateToken, async (c) => {
+  const id = parseInt(c.req.param("id"));
+  const { title, description } = await c.req.json();
+  await db
+    .update(listsTable)
+    .set({ title, description })
+    .where(sql`id = ${id}`);
   return c.json({ data: null });
 });
 
@@ -220,7 +256,7 @@ app.put("/api/emails/:id", validateToken, async (c) => {
 
 app.post("/api/emails/:id/send", validateToken, async (c) => {
   const id = parseInt(c.req.param("id"));
-  const { senderId, filter, time } = await c.req.json();
+  const { senderId, filter, time, lists = [] } = await c.req.json();
   // TODO: verify filter
   await pushEvent(
     {
@@ -228,10 +264,16 @@ app.post("/api/emails/:id/send", validateToken, async (c) => {
       sender: senderId,
       email: id,
       filter,
+      lists,
     },
     time,
   );
   return c.json({ data: null });
+});
+
+app.get("/api/lists", validateToken, async (c) => {
+  const data = await db.select().from(listsTable);
+  return c.json({ data });
 });
 
 app.get("/api/subscribers", validateToken, async (c) => {
@@ -249,6 +291,36 @@ app.get("/api/config", validateToken, async (c) => {
     })
     .from(config);
   return c.json({ data: configObject[0] });
+});
+
+app.post("/api/subs/check", validateToken, async (c) => {
+  const { lists, filter } = await c.req.json();
+  const subs = await db
+    .select({
+      name: subscribers.name,
+      email: subscribers.email,
+      attributes: subscribers.attributes,
+      id: subscribers.id,
+    })
+    .from(subscribers)
+    .innerJoin(subscriptions, sql`subscribers.id = subscriptions.subscriber`)
+    .where(
+      sql`subscriptions.list IN (${lists.join(
+        ", ",
+      )}) AND subscribers.status = "subscribed"`,
+    );
+  let filterFn: any;
+  try {
+    filterFn = getFilter(filter);
+  } catch {}
+  const sendSubs = subs.filter((sub) =>
+    filterFn({
+      name: sub.name,
+      email: sub.email,
+      sub: sub.attributes,
+    }),
+  );
+  return c.json({ data: sendSubs.length });
 });
 
 app.put("/api/config", validateToken, async (c) => {
