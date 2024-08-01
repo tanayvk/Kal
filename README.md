@@ -8,7 +8,13 @@ Stay tuned for the upcoming launch!
 
 - [x] Works with any SMTP server
 - [ ] Support for multiple lists
+    - [x] Create and manage lists
+    - [ ] Subscribe forms for lists
+    - [ ] Configure list opt-in
+    - [ ] Allow user to update preferences
 - [ ] Email templates
+    - [x] Basic templating
+    - [ ] Template previews and description
 - [ ] Tracking and analytics
   - [x] Tracking open rates and link clicks
   - [ ] Analytics UI
@@ -22,6 +28,7 @@ Stay tuned for the upcoming launch!
 - [ ] Paid subscriptions
 - [ ] Subscriber management
 - [ ] Better email management
+- [ ] Backup and restore
 
 ---
 
