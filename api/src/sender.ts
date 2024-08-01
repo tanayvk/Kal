@@ -113,7 +113,6 @@ const sendPendingEmails = async () => {
     .where(sql`status = "pending"`);
   // TODO: concurrency and rate limitting
   for (const email of pendingEmails) {
-    console.log("pending", email);
     if (email?.payload) {
       try {
         await sendEmail(
@@ -127,7 +126,7 @@ const sendPendingEmails = async () => {
           .set({ status: "sent", sentAt: sql`(CURRENT_TIMESTAMP)` })
           .where(sql`id = ${email.id}`);
       } catch (error) {
-        console.log("err", error);
+        console.log("sendPendingEmails err", error);
         await db
           .update(sendingQueue)
           .set({

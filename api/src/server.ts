@@ -220,7 +220,6 @@ app.post("/api/emails", validateToken, async (c) => {
 
 app.get("/api/emails", validateToken, async (c) => {
   const templates = c.req.query("templates");
-  console.log("templates", !!templates);
   const emailList = await db
     .select()
     .from(emails)
