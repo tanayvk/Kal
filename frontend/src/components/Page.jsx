@@ -15,7 +15,7 @@ const Page = ({ title, children }) => {
     <div className="flex-grow flex flex-col">
       <div className="flex-grow flex justify-center pt-10">
         <div className="space-y-10 container px-4 md:px-0 lg:max-w-[1280px]">
-          <h1 className="font-semibold text-2xl">{title}</h1>
+          {title && <h1 className="font-semibold text-2xl">{title}</h1>}
           <div className="h-full overflow-scroll">
             <Suspense fallback={<CircularProgress height="h-64" />}>
               <ErrorBoundary

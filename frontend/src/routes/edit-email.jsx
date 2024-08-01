@@ -4,6 +4,7 @@ import Page from "@/components/Page";
 import EditEmail from "@/components/EditEmail";
 import { useEmail } from "@/api";
 import { useNavigate } from "react-router-dom";
+import { useIsTemplate } from "../utils/templates";
 
 function Email({ id }) {
   const { data } = useEmail(id);
@@ -15,7 +16,6 @@ const Edit = () => {
   const { id } = useParams();
   return (
     <Page
-      title="Edit Email"
       actions={[
         <a
           onClick={() => navigate(`/emails/${id}/send`)}

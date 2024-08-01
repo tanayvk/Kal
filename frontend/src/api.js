@@ -26,6 +26,17 @@ export const useSenders = () => {
   });
 };
 
+export const useTemplates = () => {
+  return useQuery("templates", async () => {
+    const response = await axios.get(`${API_ENDPOINT}/emails?templates=true`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    return response.data;
+  });
+};
+
 export const useEmails = () => {
   return useQuery("emails", async () => {
     const response = await axios.get(`${API_ENDPOINT}/emails`, {

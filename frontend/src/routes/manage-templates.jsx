@@ -5,26 +5,26 @@ import { useMutation, useQueryClient } from "react-query";
 import * as api from "@/api";
 import Page from "@/components/Page";
 
-function SMTPList() {
+function Templates() {
   const queryClient = useQueryClient();
-  const { data } = api.useSmtpServers();
-  const deleteMutation = useMutation(api.deleteSmtpServer, {
+  const { data } = api.useTemplates();
+  const deleteMutation = useMutation(api.deleteEmail, {
     onMutate: async (id) => {
-      await queryClient.cancelQueries("smtpServers");
-      const previousData = queryClient.getQueryData("smtpServers");
+      await queryClient.cancelQueries("templates");
+      const previousData = queryClient.getQueryData("templates");
 
-      queryClient.setQueryData("smtpServers", (oldData) => ({
+      queryClient.setQueryData("templates", (oldData) => ({
         ...oldData,
-        data: oldData.data.filter((server) => server.id !== id),
+        data: oldData.data.filter((temp) => temp.id !== id),
       }));
 
       return { previousData };
     },
     onError: (_err, _id, context) => {
-      queryClient.setQueryData("smtpServers", context.previousData);
+      queryClient.setQueryData("templates", context.previousData);
     },
     onSettled: () => {
-      queryClient.invalidateQueries("smtpServers");
+      queryClient.invalidateQueries("templates");
     },
   });
   const handleDelete = (id) => {
@@ -33,36 +33,33 @@ function SMTPList() {
   if (!data?.data.length)
     return (
       <div className="h-[50vh] flex items-center justify-center gap-2">
-        {"No SMTP servers configured."}
-        <Link className="link font-bold" to="/create-smtp">
+        {"No email templates."}
+        <Link className="link font-bold" to="/create-template">
           Create.
         </Link>
       </div>
     );
-  const servers = data.data;
+  const emails = data.data;
   return (
     <div className="w-full mx-auto space-y-2">
-      {servers.map((server) => (
+      {emails.map((email) => (
         <div className="py-2">
-          <div className="flex items-center" key={server.id}>
+          <div className="flex items-center" key={email.id}>
             <div className="flex flex-col">
               <Link
                 className="text-2xl font-semibold hover:underline"
-                to={`/smtp/${server.id}`}
+                to={`/templates/${email.id}`}
               >
-                {server.smtpConfig?.host}
-                <span className="text-md text-neutral-300/60">
-                  {" " + server.smtpConfig?.username}
-                </span>
+                {email.subject}
               </Link>
               <span className="text-md text-neutral-300/60">
-                Created {moment.utc(server.createdAt).fromNow()}
+                Updated {moment.utc(email.updatedAt).fromNow()}
               </span>
             </div>
             <div className="flex-grow"></div>
             <div className="space-x-2">
               <a
-                onClick={() => handleDelete(server.id)}
+                onClick={() => handleDelete(email.id)}
                 className="link text-red-500 hover:text-red-400"
               >
                 Delete
@@ -75,19 +72,19 @@ function SMTPList() {
   );
 }
 
-const ManageSMTP = () => {
+const ManageTemplates = () => {
   return (
     <Page
-      title="SMTP Servers"
+      title="Email Templates"
       actions={[
-        <Link to="/create-smtp" className="link">
+        <Link to="/create-template" className="link">
           Create
         </Link>,
       ]}
     >
-      <SMTPList />
+      <Templates />
     </Page>
   );
 };
 
-export default ManageSMTP;
+export default ManageTemplates;

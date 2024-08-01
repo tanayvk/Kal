@@ -15,6 +15,13 @@
       "when": 1722484221958,
       "tag": "0001_glamorous_lilandra",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1722502771828,
+      "tag": "0002_careless_spacker_dave",
+      "breakpoints": true
     }
   ]
 }

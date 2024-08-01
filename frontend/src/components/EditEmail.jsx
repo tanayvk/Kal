@@ -6,8 +6,10 @@ import { useNavigate } from "react-router-dom";
 import Input from "@/components/Input";
 import Textarea from "@/components/Textarea";
 import Button from "@/components/Button";
+import { useIsTemplate } from "../utils/templates";
 
 export default function EditEmail({ email }) {
+  const isTemplate = useIsTemplate();
   const [type, setType] = useState("");
   const [subject, setSubject] = useState(email?.subject || "");
   const [body, setBody] = useState(email?.body || "");
@@ -19,7 +21,7 @@ export default function EditEmail({ email }) {
     onSuccess: () => {
       queryClient.invalidateQueries("emails");
       // TODO: navigate to that email with id from response??
-      if (!email) navigate("/emails");
+      navigate(isTemplate ? "/templates" : "/emails");
     },
     onSettled: () => {
       setLoading(false);

@@ -1,0 +1,1 @@
+ALTER TABLE `emails` ADD `template` integer DEFAULT false;

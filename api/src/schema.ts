@@ -91,6 +91,7 @@ export const emails = sqliteTable("emails", {
   createdBy: integer("created_by", { mode: "number" }).references(
     () => users.id,
   ),
+  template: integer("template", { mode: "boolean" }).default(false),
   ...timestamps(),
 });
 

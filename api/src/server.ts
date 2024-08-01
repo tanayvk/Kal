@@ -185,17 +185,46 @@ app.post("/api/lists", validateToken, async (c) => {
 });
 
 app.post("/api/emails", validateToken, async (c) => {
-  const { type, subject, body } = await c.req.json();
+  const json = await c.req.json();
+  let { type = "markdown", subject = "", body = "" } = json;
+  const { template, isTemplate } = json;
   // @ts-expect-error TODO wtf is this get overload error
   const user = c.get("user") as any;
-  await db.insert(emails).values({ type, subject, body, createdBy: user.id });
-  return c.json({ data: null });
+  if (template) {
+    const templateEmail = (
+      await db
+        .select()
+        .from(emails)
+        .where(sql`id = ${template}`)
+    )[0];
+    if (templateEmail) {
+      type = templateEmail.type;
+      subject = templateEmail.subject;
+      body = templateEmail.body;
+    }
+  }
+  const { id } = (
+    await db
+      .insert(emails)
+      .values({
+        type,
+        subject,
+        body,
+        template: !!isTemplate,
+        createdBy: user.id,
+      })
+      .returning({ id: emails.id })
+  )[0];
+  return c.json({ data: id });
 });
 
 app.get("/api/emails", validateToken, async (c) => {
+  const templates = c.req.query("templates");
+  console.log("templates", !!templates);
   const emailList = await db
     .select()
     .from(emails)
+    .where(sql`template = ${templates ? true : false}`)
     .orderBy(desc(emails.createdAt));
   return c.json({ data: emailList });
 });

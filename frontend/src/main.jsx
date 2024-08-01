@@ -119,7 +119,7 @@ function Router() {
         {
           path: "/create-template",
           loader: authLoader,
-          element: <CreateTemplate />,
+          element: <CreateEmail />,
         },
         {
           path: "/templates",
@@ -129,7 +129,7 @@ function Router() {
         {
           path: "/templates/:id",
           loader: authLoader,
-          element: <EditTemplate />,
+          element: <EditEmail />,
         },
         {
           path: "/create-list",
