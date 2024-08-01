@@ -9,6 +9,7 @@ Stay tuned for the upcoming launch!
 - [ ] Landing page
 - [ ] Documentation
 - [ ] Logging
+- [ ] Setup automatic/manual updates
 - [x] Works with any SMTP server
 - [ ] Support for multiple lists
     - [x] Create and manage lists
