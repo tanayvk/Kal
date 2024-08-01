@@ -12,12 +12,14 @@ cd ../api
 
 # api
 
+bun install
 bun build src/index.ts --target bun --outdir "$temp_dir/app" --define "import.meta.prod=true"
 cp -r drizzle "$temp_dir/app"
 
 # frontend
 
 cd ../frontend
+pnpm install
 pnpm run build
 mkdir -p "$temp_dir/nginx/static"
 cp -r dist/* "$temp_dir/nginx/static"
