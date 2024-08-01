@@ -6,6 +6,8 @@ Stay tuned for the upcoming launch!
 
 ## Tasks and Features
 
+- [ ] Landing page
+- [ ] Documentation
 - [x] Works with any SMTP server
 - [ ] Support for multiple lists
     - [x] Create and manage lists
