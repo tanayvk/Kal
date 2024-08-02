@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import db from "./database";
-import { desc, sql } from "drizzle-orm";
+import { desc, inArray, sql } from "drizzle-orm";
 import {
   users,
   senders,
@@ -117,12 +117,13 @@ app.put("/api/senders/:id", validateToken, async (c) => {
   return c.json({ data: null });
 });
 
-app.get("/api/unsubscribe/:id", async (c) => {
+app.get("/api/unsubscribe/:id/:uuid", async (c) => {
   const id = parseInt(c.req.param("id"));
+  const uuid = c.req.param("uuid");
   await db
     .update(subscribers)
     .set({ status: "unsubscribed" })
-    .where(sql`id = ${id}`);
+    .where(sql`id = ${id} and uuid = ${uuid}`);
   return c.redirect("/unsubscribed");
 });
 
@@ -137,46 +138,120 @@ app.get("/api/confirm/:id/:uuid", async (c) => {
 });
 
 app.post("/api/subscribe", async (c) => {
-  const {
-    name,
-    email,
-    attributes = {},
-    confirmed = false,
-  } = await c.req.json();
+  const { name, email, attributes = {}, lists = [] } = await c.req.json();
+  // TODO: make double opt-in optional?
+  const confirmed = false;
   const existingSubscriber = (
     await db
       .select()
       .from(subscribers)
       .where(sql`email = ${email}`)
   )[0];
-  // TODO: send confirmation again, if it's been a while??
   if (existingSubscriber) {
+    if (existingSubscriber.status === "subscribed") {
+      return c.json({
+        data: null,
+        message: "Email already subscribed",
+        success: false,
+      });
+    } else {
+      await db
+        .update(subscribers)
+        .set({
+          name,
+          attributes,
+          status: confirmed ? "subscribed" : "unconfirmed",
+        })
+        .where(sql`email = ${email}`);
+
+      if (!confirmed) {
+        pushEvent({
+          type: "ConfirmationEmail",
+          sub: existingSubscriber.id,
+        });
+      }
+      await manageSubscriptions(existingSubscriber.id, lists);
+      return c.json({
+        data: null,
+        success: true,
+      });
+    }
+  } else {
+    const status = confirmed ? "subscribed" : "unconfirmed";
+    const newSubscriber = (
+      await db
+        .insert(subscribers)
+        .values({ name, email, attributes, status })
+        .returning({ id: subscribers.id })
+    )[0];
+    if (!confirmed) {
+      pushEvent({
+        type: "ConfirmationEmail",
+        sub: newSubscriber.id,
+      });
+    }
+    await manageSubscriptions(newSubscriber.id, lists);
     return c.json({
       data: null,
-      message: "Email already subscribed",
+      success: true,
+    });
+  }
+});
+
+app.put("/api/subscriber/:id/:uuid", async (c) => {
+  const id = parseInt(c.req.param("id"));
+  const uuid = c.req.param("uuid");
+  const { name, attributes = {}, lists = [] } = await c.req.json();
+  const existingSubscriber = (
+    await db
+      .select()
+      .from(subscribers)
+      .where(sql`id = ${id} AND uuid = ${uuid}`)
+  )[0];
+  if (!existingSubscriber) {
+    c.status(404);
+    return c.json({
+      data: null,
       success: false,
     });
   }
-  // TODO: check opt-in from list settings
-  const status = confirmed ? "subscribed" : "unconfirmed";
-  const sub = (
-    await db
-      .insert(subscribers)
-      .values({ name, email, attributes, status })
-      .returning({ id: subscribers.id })
-  )[0];
-  if (!confirmed) {
-    pushEvent({
-      type: "ConfirmationEmail",
-      sub: sub.id,
-    });
-  }
+  await db
+    .update(subscribers)
+    .set({
+      name,
+      attributes,
+    })
+    .where(sql`id = ${id}`);
+  await manageSubscriptions(id, lists);
   return c.json({
     data: null,
-    message: "Subscription successful",
     success: true,
   });
 });
+
+async function manageSubscriptions(subscriberId: number, listIds: number[]) {
+  const filteredIds = listIds.filter((id) => typeof id === "number");
+  const validLists =
+    filteredIds.length > 0
+      ? await db
+          .select({ id: listsTable.id })
+          .from(listsTable)
+          .where(inArray(listsTable.id, filteredIds))
+      : [];
+  const validListIds = validLists.map((list) => list.id);
+  const whereClause =
+    validListIds.length > 0
+      ? sql`subscriber = ${subscriberId} and list not in ${validListIds}`
+      : sql`subscriber = ${subscriberId}`;
+  await db.delete(subscriptions).where(whereClause);
+  const newSubs = validListIds.map((listId) => ({
+    subscriber: subscriberId,
+    list: listId,
+  }));
+  if (newSubs.length > 0) {
+    await db.insert(subscriptions).values(newSubs).onConflictDoNothing();
+  }
+}
 
 app.post("/api/lists", validateToken, async (c) => {
   const { title, description } = await c.req.json();
@@ -358,6 +433,54 @@ app.put("/api/config", validateToken, async (c) => {
     .update(config)
     .set({ defaultSender, welcomeEmail, confirmationEmail, siteUrl });
   return c.json({ data: null });
+});
+
+app.get("/api/sub-info", async (c) => {
+  const lists = await db.select().from(listsTable);
+  return c.json({ data: { lists } });
+});
+
+app.get("/api/sub/:id/:uuid", async (c) => {
+  const id = parseInt(c.req.param("id"));
+  const uuid = c.req.param("uuid");
+  const subscriber = (
+    await db
+      .select({
+        id: subscribers.id,
+        name: subscribers.name,
+        email: subscribers.email,
+        uuid: subscribers.uuid,
+      })
+      .from(subscribers)
+      .where(sql`id = ${id} AND uuid = ${uuid}`)
+  )[0];
+  if (!subscriber) {
+    c.status(404);
+    return c.json({
+      data: null,
+      message: "Subscriber not found",
+      success: false,
+    });
+  }
+  const lists = await db.select().from(listsTable);
+  const subscribedLists = (
+    await db
+      .select({
+        listId: subscriptions.list,
+      })
+      .from(subscriptions)
+      .where(sql`subscriber = ${id}`)
+  ).map((sub) => sub.listId);
+
+  return c.json({
+    data: {
+      name: subscriber.name,
+      email: subscriber.email,
+      selectedLists: subscribedLists,
+      lists,
+    },
+    success: true,
+  });
 });
 
 export default app;

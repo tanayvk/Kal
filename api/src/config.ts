@@ -28,3 +28,10 @@ export async function getDefaultSender() {
   });
   return config?.defaultSender;
 }
+
+export async function getSiteUrl() {
+  const config = await db.query.config.findFirst({
+    columns: { siteUrl: true },
+  });
+  return config?.siteUrl;
+}

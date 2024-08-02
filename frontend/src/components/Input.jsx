@@ -12,7 +12,7 @@ const InputField = ({ label, description, preview, ...rest }) => (
         className={clsx(
           "mt-3 block w-full rounded-lg bg-white/5 py-1.5 px-3 text-sm/6 text-white",
           "focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25",
-          "placeholder:opacity-60",
+          "placeholder:opacity-60 data-[disabled]:bg-white/[3%] data-[disabled]:cursor-not-allowed",
         )}
         {...rest}
       />

@@ -1,5 +1,11 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text, index } from "drizzle-orm/sqlite-core";
+import {
+  integer,
+  sqliteTable,
+  text,
+  index,
+  unique,
+} from "drizzle-orm/sqlite-core";
 import * as uuid from "uuid";
 
 import {
@@ -134,6 +140,7 @@ export const subscriptions = sqliteTable(
     ...timestamps(),
   },
   (table) => ({
+    unq: unique().on(table.subscriber, table.list),
     listIdx: index("subscription_list_idx").on(table.list),
     subIdx: index("subscription_sub_idx").on(table.subscriber),
   }),
@@ -152,5 +159,7 @@ export const config = sqliteTable("config", {
   confirmationEmail: integer("confirmation_email", {
     mode: "number",
   }).references(() => emails.id),
+  title: text("title").default(""),
+  description: text("description").default(""),
   ...timestamps(),
 });

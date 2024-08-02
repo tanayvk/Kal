@@ -6,6 +6,7 @@ import { EmailMessagePayload } from "./types";
 import { emails, senders, sendingQueue, subscribers } from "./schema";
 import { marked } from "marked";
 import { Liquid } from "liquidjs";
+import { getSiteUrl } from "./config";
 
 const transporters: Record<number, any> = {};
 async function getTransporter(smtpServerId: number) {
@@ -55,12 +56,15 @@ export const queueEmail = async (
       .from(subscribers)
       .where(sql`id = ${sub}`)
   )[0];
+  const siteUrl = await getSiteUrl();
 
   const context = {
     name: subObj.name,
     email: subObj.email,
     sub: subObj.attributes || {},
-    // TODO: unsubscribe link, confirm link
+    unsubscribe_link: `${siteUrl}/api/unsubscribe/${subObj.id}/${subObj.uuid}`,
+    confirm_link: `${siteUrl}/api/confirm/${subObj.id}/${subObj.uuid}`,
+    update_prefs_link: `${siteUrl}/sub/${subObj.id}/${subObj.uuid}/update`,
   };
   const subject = await engine.render(
     engine.parse(emailObj.subject || ""),

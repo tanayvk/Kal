@@ -30,14 +30,13 @@ import ManageTemplates from "./routes/manage-templates";
 import CreateSender from "./routes/create-sender";
 import CreateSMTP from "./routes/create-smtp";
 import CreateList from "./routes/create-list";
-import CreateTemplate from "./routes/create-template";
 import EditSender from "./routes/edit-sender";
 import EditSMTP from "./routes/edit-smtp";
 import EditEmail from "./routes/edit-email";
 import EditList from "./routes/edit-list";
-import EditTemplate from "./routes/edit-template";
 import SendEmail from "./routes/send-email";
 import Subscribe from "./routes/subscribe";
+import Message from "./routes/message";
 import Subscribers from "./routes/subscribers";
 import Settings from "./routes/settings";
 
@@ -150,6 +149,17 @@ function Router() {
     },
     { path: "/login", loader: guestLoader, element: <Login /> },
     { path: "/subscribe", element: <Subscribe /> },
+    { path: "/sub/:id/:uuid/update", element: <Subscribe /> },
+    {
+      path: "/unsubscribed",
+      element: (
+        <Message message="You've been unsubscribed. Sorry to see you go." />
+      ),
+    },
+    {
+      path: "/confirmed",
+      element: <Message message="Subscription confirmed successfully!" />,
+    },
   ]);
   return <RouterProvider router={router} />;
 }

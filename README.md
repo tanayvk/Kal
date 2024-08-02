@@ -11,11 +11,11 @@ Stay tuned for the upcoming launch!
 - [ ] Logging
 - [ ] Setup automatic/manual updates
 - [x] Works with any SMTP server
-- [ ] Support for multiple lists
+- [x] Support for multiple lists
     - [x] Create and manage lists
-    - [ ] Subscribe forms for lists
-    - [ ] Configure list opt-in
-    - [ ] Allow user to update preferences
+    - [x] Subscribe to lists and allow user to update preferences
+- [ ] Make double opt-in optional
+- [ ] Welcome Email
 - [ ] Email templates
     - [x] Basic templating
     - [ ] Template previews and description

@@ -283,10 +283,20 @@ export const sendEmail = async ({ id, senderId, filter, time, lists }) => {
   return response.data;
 };
 
-export const subscribe = async ({ name, email }) => {
+export const updateSubscriber = async ({ name, email, lists, id, uuid }) => {
+  const response = await axios.put(`${API_ENDPOINT}/subscriber/${id}/${uuid}`, {
+    name,
+    email,
+    lists,
+  });
+  return response.data;
+};
+
+export const subscribe = async ({ name, email, lists }) => {
   const response = await axios.post(`${API_ENDPOINT}/subscribe`, {
     name,
     email,
+    lists,
   });
   return response.data;
 };
@@ -305,4 +315,15 @@ export const getSubs = async ({ lists, filter }) => {
     },
   );
   return response.data;
+};
+
+export const useSubInfo = ({ id, uuid }) => {
+  const endpoint =
+    id && uuid
+      ? `${API_ENDPOINT}/sub/${id}/${uuid}`
+      : `${API_ENDPOINT}/sub-info`;
+  return useQuery("subInfo", async () => {
+    const response = await axios.get(endpoint);
+    return response.data;
+  });
 };

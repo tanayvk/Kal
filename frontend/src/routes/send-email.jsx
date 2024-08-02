@@ -10,7 +10,7 @@ import { parseDate } from "chrono-node";
 import Input from "@/components/Input";
 import Listbox from "@/components/Listbox";
 import Button from "@/components/Button";
-import { useSenders, sendEmail } from "@/api";
+import { useSenders, sendEmail, useLists } from "@/api";
 import Page from "@/components/Page";
 import { setSentEmails } from "@/stores/sent-email";
 import ListSelector from "../components/ListSelector";
@@ -28,9 +28,11 @@ function Send() {
   const { data: sendersData } = useSenders();
   const senders = sendersData?.data || [];
   const queryClient = useQueryClient();
-  const [lists, setLists] = useState([]);
+  const [selectedLists, setLists] = useState([]);
   const [subs, setSubs] = useState(0);
   const [subsLoading, setSubsLoading] = useState(true);
+  const { data: listsData } = useLists();
+  const lists = listsData?.data || [];
 
   const sendingTime = (
     timestamp ? moment(timestamp) : moment(new Date())
@@ -40,7 +42,7 @@ function Send() {
     debounce(async () => {
       setSubsLoading(true);
       try {
-        const count = await getSubs({ lists, filter });
+        const count = await getSubs({ lists: selectedLists, filter });
         setSubs(count.data);
       } catch (err) {
         console.error("err fetching subs", err);
@@ -61,7 +63,7 @@ function Send() {
 
   useEffect(() => {
     computeSubs();
-  }, [filter, lists]);
+  }, [filter, selectedLists]);
 
   const mutation = useMutation(sendEmail, {
     onMutate: () => {
@@ -83,7 +85,7 @@ function Send() {
       senderId: sender.id,
       filter,
       time,
-      lists,
+      lists: selectedLists,
     };
     mutation.mutate(emailData);
   };
@@ -123,11 +125,12 @@ function Send() {
         <ListSelector
           label="Lists"
           description="Choose the lists that you want to send this email to."
-          selected={lists}
+          selected={selectedLists}
           setSelected={(list, v) => {
-            if (v) setLists([...lists, list]);
-            else setLists(lists.filter((l) => list !== l));
+            if (v) setLists([...selectedLists, list]);
+            else setLists(selectedLists.filter((l) => list !== l));
           }}
+          lists={lists}
         />
         <Input
           label="Time"
