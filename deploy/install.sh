@@ -75,7 +75,7 @@ while true; do
   fi
 done
 
-docker compose exec -T app bash -c "bun run /app/index.js init -u $USER -p $PASS"
+docker compose exec -T app bash -c "bun run /app/index.js init -u $USER -p $PASS -d $DOMAIN"
 
 cd $current_dir
 rm -rf $temp_dir

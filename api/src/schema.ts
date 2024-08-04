@@ -161,5 +161,16 @@ export const config = sqliteTable("config", {
   }).references(() => emails.id),
   title: text("title").default(""),
   description: text("description").default(""),
+  openTracking: integer("open_tracking", { mode: "boolean" }).default(true),
+  linkTracking: integer("link_tracking", { mode: "boolean" }).default(true),
+  ...timestamps(),
+});
+
+export const tracking = sqliteTable("tracking", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  event: integer("event"),
+  sub: integer("sub"),
+  type: text("type").$type<"open" | "link">(),
+  url: text("url"),
   ...timestamps(),
 });

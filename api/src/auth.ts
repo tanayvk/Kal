@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 import { createMiddleware } from "hono/factory";
 import { getSecret } from "./config";
 import db from "./database";

@@ -1,16 +1,18 @@
 {
   "name": "api",
   "scripts": {
-    "dev": "bun run --hot src/index.ts",
+    "dev": "bun --watch run src/index.ts",
     "clean": "rm ./data.db && bun run src/migrate.ts"
   },
   "dependencies": {
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/nodemailer": "^6.4.15",
     "@types/readline-sync": "^1.4.8",
     "@types/uuid": "^10.0.0",
     "commander": "^12.1.0",
     "drizzle-kit": "^0.23.0",
     "drizzle-orm": "^0.32.0",
+    "fast-xml-parser": "^4.4.1",
     "filtrex": "^3.0.0",
     "hono": "^4.4.13",
     "jsonwebtoken": "^9.0.2",

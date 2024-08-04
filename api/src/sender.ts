@@ -1,12 +1,14 @@
 import * as nodemailer from "nodemailer";
 import { sql } from "drizzle-orm";
-import db from "./database";
-
-import { EmailMessagePayload } from "./types";
-import { emails, senders, sendingQueue, subscribers } from "./schema";
 import { marked } from "marked";
 import { Liquid } from "liquidjs";
-import { getSiteUrl } from "./config";
+import * as jwt from "jsonwebtoken";
+import { XMLBuilder, XMLParser } from "fast-xml-parser";
+
+import { EmailMessagePayload } from "./types";
+import { emails, senders, sendingQueue, subscribers, config } from "./schema";
+import { getSecret } from "./config";
+import db from "./database";
 
 const transporters: Record<number, any> = {};
 async function getTransporter(smtpServerId: number) {
@@ -30,6 +32,56 @@ async function getTransporter(smtpServerId: number) {
 }
 
 const engine = new Liquid();
+
+async function addOpenTracking({
+  html,
+  event,
+  siteUrl,
+  jwtSecret,
+  subscriber,
+}) {
+  const openToken = jwt.sign({ e: event, s: subscriber }, jwtSecret);
+  return (
+    html +
+    `<img src="${siteUrl}/api/open?p=${encodeURIComponent(openToken)}" />`
+  );
+}
+
+const xmlOptions = {
+  ignoreAttributes: false,
+  preserveOrder: true,
+  trimValues: false,
+};
+const xmlParser = new XMLParser(xmlOptions);
+const xmlBuilder = new XMLBuilder(xmlOptions);
+
+async function addLinkTracking({
+  siteUrl,
+  html,
+  event,
+  jwtSecret,
+  subscriber,
+}) {
+  const obj = xmlParser.parse(html);
+  updateLinks(obj);
+  function updateLinks(obj: any) {
+    if (Array.isArray(obj)) obj.forEach((o) => updateLinks(o));
+    else if (typeof obj === "object") {
+      if ({}.hasOwnProperty.call(obj, "@_href")) {
+        // skip Kal links
+        if (obj["@_href"].startsWith(siteUrl)) return;
+        const linkToken = jwt.sign(
+          { e: event, u: obj["@_href"], s: subscriber },
+          jwtSecret,
+        );
+        obj["@_href"] = `${siteUrl}/api/track?p=${encodeURIComponent(
+          linkToken,
+        )}`;
+      } else Object.values(obj).forEach((o) => updateLinks(o));
+    }
+  }
+  return xmlBuilder.build(obj) + "";
+}
 
 // TODO: cache template
 export const queueEmail = async (
@@ -56,7 +108,16 @@ export const queueEmail = async (
       .from(subscribers)
       .where(sql`id = ${sub}`)
   )[0];
-  const siteUrl = await getSiteUrl();
+  const jwtSecret = await getSecret();
+  const { siteUrl, linkTracking, openTracking } = (
+    await db
+      .select({
+        siteUrl: config.siteUrl,
+        linkTracking: config.linkTracking,
+        openTracking: config.openTracking,
+      })
+      .from(config)
+  )[0];
 
   const context = {
     name: subObj.name,
@@ -71,7 +132,26 @@ export const queueEmail = async (
     context,
   );
   const body = await engine.render(engine.parse(emailObj.body || ""), context);
-  const html = emailObj.type === "plaintext" ? body : marked.parse(body);
+  let html = emailObj.type === "plaintext" ? body : marked.parse(body);
+
+  if (linkTracking) {
+    html = await addLinkTracking({
+      siteUrl,
+      jwtSecret,
+      html,
+      event,
+      subscriber: sub,
+    });
+  }
+  if (openTracking) {
+    html = await addOpenTracking({
+      siteUrl,
+      html,
+      jwtSecret,
+      event,
+      subscriber: sub,
+    });
+  }
 
   await db.insert(sendingQueue).values({
     event,
@@ -83,7 +163,7 @@ export const queueEmail = async (
       to: subObj.email,
       email: {
         subject,
-        html,
+        html: html.toString(),
         text: "", // TODO: text version
       },
     },
@@ -119,6 +199,7 @@ const sendPendingEmails = async () => {
   for (const email of pendingEmails) {
     if (email?.payload) {
       try {
+        console.log("sending", email.payload);
         await sendEmail(
           email.payload.smtpServer,
           email.payload.from,

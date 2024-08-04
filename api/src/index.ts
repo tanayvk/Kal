@@ -6,6 +6,7 @@ import { startSender } from "./sender";
 import db from "./database";
 import server from "./server";
 import { createUser } from "./auth";
+import { setSiteUrl } from "./config";
 
 const program = new Command();
 
@@ -16,9 +17,10 @@ async function start() {
   Bun.serve(server);
 }
 
-async function init(username: string, password: string) {
+async function init(username: string, password: string, domain: string) {
   try {
     await createUser(username, password);
+    await setSiteUrl(`https://${domain}`);
   } catch (error) {
     console.error("Error creating user:", error);
   }
@@ -29,10 +31,11 @@ program.command("start").description("Start Kal.").action(start);
 program
   .command("init")
   .description("Initialize Kal.")
-  .requiredOption("-u, --username <username>", "Username for the new user")
-  .requiredOption("-p, --password <password>", "Password for the new user")
+  .requiredOption("-u, --username <username>", "Username")
+  .requiredOption("-p, --password <password>", "Password")
+  .requiredOption("-d, --domain <domain>", "Domain")
   .action((cmdObj) => {
-    const { username, password } = cmdObj;
-    init(username, password);
+    const { username, password, domain } = cmdObj;
+    init(username, password, domain);
   });
 program.parse(process.argv);

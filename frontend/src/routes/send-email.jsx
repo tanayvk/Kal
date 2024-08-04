@@ -39,10 +39,10 @@ function Send() {
   ).format("MMMM Do YYYY, h:mm A Z");
 
   const computeSubs = useCallback(
-    debounce(async () => {
+    debounce(async (lists, filter) => {
       setSubsLoading(true);
       try {
-        const count = await getSubs({ lists: selectedLists, filter });
+        const count = await getSubs({ lists, filter });
         setSubs(count.data);
       } catch (err) {
         console.error("err fetching subs", err);
@@ -62,7 +62,7 @@ function Send() {
   }, [time]);
 
   useEffect(() => {
-    computeSubs();
+    computeSubs(selectedLists, filter);
   }, [filter, selectedLists]);
 
   const mutation = useMutation(sendEmail, {

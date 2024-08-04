@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import db from "./database";
+import * as jwt from "jsonwebtoken";
 import { desc, inArray, sql } from "drizzle-orm";
+
+import db from "./database";
 import {
   users,
   senders,
@@ -11,10 +13,12 @@ import {
   config,
   subscriptions,
   lists as listsTable,
+  tracking,
 } from "./schema";
 import { validateToken, comparePassword, generateToken } from "./auth";
 import { pushEvent } from "./events";
-import { getFilter } from "./filter";
+import { getSubsByListsFilter } from "./utils/subs";
+import { getSecret } from "./config";
 
 const app = new Hono();
 
@@ -398,32 +402,8 @@ app.get("/api/config", validateToken, async (c) => {
 
 app.post("/api/subs/check", validateToken, async (c) => {
   const { lists, filter } = await c.req.json();
-  const subs = await db
-    .select({
-      name: subscribers.name,
-      email: subscribers.email,
-      attributes: subscribers.attributes,
-      id: subscribers.id,
-    })
-    .from(subscribers)
-    .innerJoin(subscriptions, sql`subscribers.id = subscriptions.subscriber`)
-    .where(
-      sql`subscriptions.list IN (${lists.join(
-        ", ",
-      )}) AND subscribers.status = "subscribed"`,
-    );
-  let filterFn: any;
-  try {
-    filterFn = getFilter(filter);
-  } catch {}
-  const sendSubs = subs.filter((sub) =>
-    filterFn({
-      name: sub.name,
-      email: sub.email,
-      sub: sub.attributes,
-    }),
-  );
-  return c.json({ data: sendSubs.length });
+  const subs = await getSubsByListsFilter(lists, filter);
+  return c.json({ data: subs.length });
 });
 
 app.put("/api/config", validateToken, async (c) => {
@@ -481,6 +461,52 @@ app.get("/api/sub/:id/:uuid", async (c) => {
     },
     success: true,
   });
+});
+
+async function trackLink(token: string) {
+  try {
+    const secret = await getSecret();
+    const { s, e, u } = jwt.verify(token, secret) as any;
+    await db.insert(tracking).values({
+      type: "link",
+      sub: s,
+      event: e,
+      url: u,
+    });
+  } catch (err) {
+    console.log("err tracking link", err);
+  }
+}
+
+async function trackOpen(token: string) {
+  try {
+    const secret = await getSecret();
+    const { s, e } = jwt.verify(token, secret) as any;
+    await db.insert(tracking).values({
+      type: "open",
+      sub: s,
+      event: e,
+    });
+  } catch (err) {
+    console.log("err tracking open", err);
+  }
+}
+
+app.get("/api/track", async (c) => {
+  const token = c.req.query("p") || "";
+  const { u } = jwt.decode(token) as any;
+  setTimeout(() => trackLink(token), 0);
+  return c.redirect(u);
+});
+
+app.get("/api/open", async (c) => {
+  console.log("sending image");
+  const token = c.req.query("p") || "";
+  setTimeout(() => trackOpen(token), 0);
+  c.header("Content-Type", "image/png");
+  const base64 =
+    "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAHklEQVQ4T2NkoBAwUqifYdQAhtEwACai0XQwGMIAACaYABGnE9aRAAAAAElFTkSuQmCC";
+  return c.body(base64);
 });
 
 export default app;

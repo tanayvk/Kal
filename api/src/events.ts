@@ -1,9 +1,9 @@
 import { sql } from "drizzle-orm";
 import db from "./database";
-import { events, config, subscribers, subscriptions } from "./schema";
+import { events, config } from "./schema";
 import { EventPayload } from "./types";
 import { queueEmail } from "./sender";
-import { getFilter } from "./filter";
+import { getSubsByListsFilter } from "./utils/subs";
 
 export const pushEvent = async (event: EventPayload, time?: string) => {
   await db.insert(events).values({
@@ -34,34 +34,11 @@ const processEvents = async () => {
           );
         }
       } else if (event.payload.type === "SendEmail") {
-        const subs = await db
-          .select({
-            name: subscribers.name,
-            email: subscribers.email,
-            attributes: subscribers.attributes,
-            id: subscribers.id,
-          })
-          .from(subscribers)
-          .innerJoin(
-            subscriptions,
-            sql`subscribers.id = subscriptions.subscriber`,
-          )
-          .where(
-            sql`subscriptions.list IN (${event.payload.lists.join(
-              ", ",
-            )}) AND subscribers.status = "subscribed"`,
-          );
-        let filter: any;
-        try {
-          filter = getFilter(event.payload.filter);
-        } catch {}
+        const subs = await getSubsByListsFilter(
+          event.payload.lists,
+          event.payload.filter,
+        );
         for (const sub of subs) {
-          const subFilter = filter({
-            name: sub.name,
-            email: sub.email,
-            sub: sub.attributes,
-          });
-          if (!subFilter) continue;
           await queueEmail(
             event.id,
             event.payload.sender,

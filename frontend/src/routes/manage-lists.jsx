@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import moment from "moment";
 import { useMutation, useQueryClient } from "react-query";
 
 import * as api from "@/api";
@@ -51,10 +50,9 @@ function Lists() {
                 to={`/lists/${list.id}`}
               >
                 {list.title}
-                <span className="text-md">{": " + list.description}</span>
               </Link>
               <span className="text-md text-neutral-300/60">
-                Created {moment.utc(list.createdAt).fromNow()}
+                {list.description}
               </span>
             </div>
             <div className="flex-grow"></div>

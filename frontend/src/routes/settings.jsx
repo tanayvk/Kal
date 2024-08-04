@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 
 import Input from "@/components/Input";
+import Button from "@/components/Button";
 import Listbox from "@/components/Listbox";
 import Page from "@/components/Page";
 import { useConfig, updateConfig, useEmails, useSenders } from "@/api";
@@ -22,7 +23,7 @@ function Config() {
   const [siteUrl, setSiteUrl] = useState(config.siteUrl || "");
   const [sender, setSender] = useState(
     config.defaultSender
-      ? emails.find((sender) => sender.id === config.defaultSender)
+      ? senders.find((sender) => sender.id === config.defaultSender)
       : null,
   );
   const [welcomeEmail, setWelcomeEmail] = useState(
@@ -31,7 +32,7 @@ function Config() {
       : null,
   );
   const [confirmEmail, setConfirmEmail] = useState(
-    config.welcomeEmail
+    config.confirmationEmail
       ? emails.find((email) => email.id === config.confirmationEmail)
       : null,
   );
@@ -52,6 +53,7 @@ function Config() {
     const configData = {
       defaultSender: sender?.id,
       welcomeEmail: welcomeEmail?.id,
+      confirmationEmail: confirmEmail?.id,
       siteUrl: siteUrl,
     };
     setLoading(true);
@@ -119,15 +121,13 @@ function Config() {
           defaultText="Select Welcome Email"
         />
       </div>
-      <div className="mt-6 flex gap-2">
-        {loading ? (
-          <span>Updating...</span>
-        ) : (
-          <button className="link" onClick={handleSubmit}>
-            Update Settings
-          </button>
+      <div className="mt-6 flex gap-2 items-center">
+        <Button loading={loading} onClick={handleSubmit}>
+          Update
+        </Button>
+        {!loading && updated && (
+          <span className="text-md text-gray-400">Updated.</span>
         )}
-        {!loading && updated && <span className="text-gray-400">Updated.</span>}
       </div>
     </div>
   );

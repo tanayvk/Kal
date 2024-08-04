@@ -9,4 +9,19 @@ export async function getSubs() {
   return db.select().from(schema.subscribers);
 }
 
+export async function deleteSubs() {
+  return Promise.all([
+    db.delete(schema.subscribers),
+    db.delete(schema.subscriptions),
+  ]);
+}
+
+export async function enableAnalytics() {
+  await db
+    .update(schema.config)
+    .set({ linkTracking: true, openTracking: true });
+}
+
+export async function track() {}
+
 export default db;
