@@ -33,6 +33,7 @@ const CreateEmail = () => {
   return (
     <Page
       title={`Create ${isTemplate ? "Template" : "Email"}: Choose a Template`}
+      back={{ url: isTemplate ? "/templates" : "/emails" }}
     >
       {loading && <CircularProgress height="h-64" />}
       {!loading &&

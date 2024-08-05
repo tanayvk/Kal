@@ -12,7 +12,7 @@ function List() {
 
 const CreateList = () => {
   return (
-    <Page title="Edit List">
+    <Page title="Edit List" back={{ url: "/lists", title: "Lists" }}>
       <List />
     </Page>
   );

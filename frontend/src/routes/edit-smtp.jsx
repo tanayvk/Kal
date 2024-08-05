@@ -12,7 +12,7 @@ function SMTP() {
 
 const Edit = () => {
   return (
-    <Page title="Edit SMTP Server">
+    <Page title="Edit SMTP Server" back={{ title: "SMTP", url: "/smtp" }}>
       <SMTP />
     </Page>
   );

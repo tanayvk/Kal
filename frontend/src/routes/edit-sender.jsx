@@ -12,7 +12,7 @@ function Sender() {
 
 const CreateSender = () => {
   return (
-    <Page title="Create Sender">
+    <Page title="Create Sender" back={{ title: "Senders", url: "/senders" }}>
       <Sender />
     </Page>
   );

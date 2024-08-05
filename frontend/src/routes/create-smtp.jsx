@@ -3,7 +3,7 @@ import EditSMTP from "@/components/EditSMTP";
 
 const CreateSMTP = () => {
   return (
-    <Page title="Create SMTP Server">
+    <Page title="Create SMTP Server" back={{ url: "/smtp" }}>
       <EditSMTP />
     </Page>
   );

@@ -16,6 +16,7 @@ const Edit = () => {
   const { id } = useParams();
   return (
     <Page
+      back={{ url: "/emails", title: "Emails" }}
       actions={[
         <a
           onClick={() => navigate(`/emails/${id}/send`)}

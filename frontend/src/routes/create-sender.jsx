@@ -3,7 +3,7 @@ import EditSender from "@/components/EditSender";
 
 const CreateSender = () => {
   return (
-    <Page title="Create Sender">
+    <Page title="Create Sender" back={{ url: "/senders" }}>
       <EditSender />
     </Page>
   );

@@ -3,7 +3,7 @@ import EditList from "@/components/EditList";
 
 const CreateList = () => {
   return (
-    <Page title="Create List">
+    <Page title="Create List" back={{ url: "/lists" }}>
       <EditList />
     </Page>
   );
