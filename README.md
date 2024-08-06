@@ -43,6 +43,7 @@ Stay tuned for the upcoming launch!
 - [ ] Backup and restore
 - [ ] Bounce processing
 - [ ] Internatlization
+- [ ] RSS-to-email
 
 ---
 
