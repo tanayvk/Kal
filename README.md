@@ -9,19 +9,26 @@ Stay tuned for the upcoming launch!
 - [ ] Landing page
 - [ ] Documentation
 - [ ] Logging
-- [ ] Setup automatic/manual updates
+- [ ] Automatic/manual updates
 - [x] Works with any SMTP server
+- [x] Multiple senders
 - [x] Support for multiple lists
     - [x] Create and manage lists
     - [x] Subscribe to lists and allow user to update preferences
-- [ ] Make double opt-in optional
+- [ ] Make double opt-in optional?
 - [ ] Welcome Email
 - [ ] Email templates
     - [x] Basic templating
     - [ ] Template previews and description
+    - [ ] Markdown + HTML/CSS
 - [ ] Tracking and analytics
   - [x] Tracking open rates and link clicks
   - [ ] Analytics UI
+      - [ ] Subscribers
+      - [ ] Emails sent/bounced
+      - [ ] Lists
+      - [ ] Email opens
+      - [ ] Link clicks
 - [ ] Optimized email deliverability
 - [ ] Bulk subscriber import
 - [ ] Uploading images and attachments
@@ -31,8 +38,11 @@ Stay tuned for the upcoming launch!
 - [ ] Automations
 - [ ] Paid subscriptions
 - [ ] Subscriber management
-- [ ] Better email management
+- [ ] Pagination
+- [ ] Search
 - [ ] Backup and restore
+- [ ] Bounce processing
+- [ ] Internatlization
 
 ---
 
